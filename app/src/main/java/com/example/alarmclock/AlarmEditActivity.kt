@@ -30,16 +30,18 @@ class AlarmEditActivity : AppCompatActivity() {
 
     private val ringtonePickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-            val uri: Uri? = result.data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
-            if (uri != null) {
-                selectedRingtoneUri = uri.toString()
-                val ringtone = RingtoneManager.getRingtone(this, uri)
-                selectedRingtoneName = ringtone?.getTitle(this) ?: "صدای انتخاب‌شده"
-            } else {
-                selectedRingtoneUri = "silent"
-                selectedRingtoneName = "بدون صدا"
+            if (result.resultCode == RESULT_OK) {
+                val uri: Uri? = result.data?.getParcelableExtra(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+                if (uri != null) {
+                    selectedRingtoneUri = uri.toString()
+                    val ringtone = RingtoneManager.getRingtone(this, uri)
+                    selectedRingtoneName = ringtone?.getTitle(this) ?: "صدای انتخاب‌شده"
+                } else {
+                    selectedRingtoneUri = "silent"
+                    selectedRingtoneName = "بدون صدا"
+                }
+                binding.textRingtone.text = selectedRingtoneName
             }
-            binding.textRingtone.text = selectedRingtoneName
         }
 
     override fun onCreate(savedInstanceState: Bundle?) {
