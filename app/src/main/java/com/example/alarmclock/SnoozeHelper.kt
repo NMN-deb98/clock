@@ -9,7 +9,14 @@ import java.util.Calendar
 
 object SnoozeHelper {
 
-    fun snooze(context: Context, alarmId: Int, minutes: Int) {
+    fun snooze(
+        context: Context,
+        alarmId: Int,
+        minutes: Int,
+        label: String,
+        ringtoneUri: String,
+        vibrate: Boolean
+    ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerTime = Calendar.getInstance().apply {
             add(Calendar.MINUTE, minutes)
@@ -17,6 +24,9 @@ object SnoozeHelper {
 
         val intent = Intent(context, SnoozeReceiver::class.java).apply {
             putExtra("alarm_id", alarmId)
+            putExtra("label", label)
+            putExtra("ringtone_uri", ringtoneUri)
+            putExtra("vibrate", vibrate)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -42,6 +52,9 @@ class SnoozeReceiver : BroadcastReceiver() {
         val ringIntent = Intent(context, AlarmRingActivity::class.java).apply {
             addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             putExtra("alarm_id", alarmId)
+            putExtra("label", intent.getStringExtra("label") ?: "")
+            putExtra("ringtone_uri", intent.getStringExtra("ringtone_uri") ?: "")
+            putExtra("vibrate", intent.getBooleanExtra("vibrate", true))
         }
         context.startActivity(ringIntent)
     }
