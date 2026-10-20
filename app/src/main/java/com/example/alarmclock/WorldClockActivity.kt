@@ -52,17 +52,19 @@ class WorldClockActivity : AppCompatActivity() {
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(20, 20, 20, 20)
-            setBackgroundColor(0xFF080808.toInt())
+            setBackgroundColor(getColor(R.color.app_background))
         }
         root.addView(TextView(this).apply {
-            text = "ساعت جهانی"; textSize = 26f; setTextColor(-1)
+            text = "ساعت جهانی"; textSize = 27f; setTextColor(getColor(R.color.text_primary)); setPadding(0, 0, 0, 16)
         })
-        spinner = Spinner(this)
+        spinner = Spinner(this).apply { background = getDrawable(R.drawable.bg_input_field); setPadding(12, 4, 12, 4) }
         val labels = allZones.keys.toList()
         spinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
         root.addView(spinner, ViewGroup.LayoutParams(-1, -2))
         root.addView(Button(this).apply {
             text = "افزودن شهر"
+            backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_cyan))
+            setTextColor(getColor(R.color.app_background))
             setOnClickListener {
                 val zone = allZones[labels[spinner.selectedItemPosition]] ?: return@setOnClickListener
                 selected.add(zone)
@@ -74,7 +76,7 @@ class WorldClockActivity : AppCompatActivity() {
         list = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         scroll.addView(list)
         root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
-        root.addView(Button(this).apply { text = "بازگشت"; setOnClickListener { finish() } })
+        root.addView(Button(this).apply { text = "بازگشت"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.surface_elevated)); setTextColor(getColor(R.color.text_primary)); setOnClickListener { finish() } })
         setContentView(root)
         render()
     }
@@ -88,7 +90,8 @@ class WorldClockActivity : AppCompatActivity() {
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(0, 18, 0, 18)
+                setPadding(16, 18, 16, 18)
+                background = getDrawable(R.drawable.bg_surface_card)
             }
             val time = TextView(this).apply {
                 textSize = 24f
@@ -98,14 +101,16 @@ class WorldClockActivity : AppCompatActivity() {
             }
             row.addView(LinearLayout(this).apply {
                 orientation = LinearLayout.VERTICAL
-                addView(TextView(this@WorldClockActivity).apply { text = city; textSize = 16f; setTextColor(0xFFBDBDBD.toInt()) })
+                addView(TextView(this@WorldClockActivity).apply { text = city; textSize = 15f; setTextColor(getColor(R.color.text_secondary)) })
                 addView(time)
             }, LinearLayout.LayoutParams(0, -2, 1f))
             row.addView(Button(this).apply {
                 text = "حذف"
+                backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.danger))
+                setTextColor(getColor(R.color.app_background))
                 setOnClickListener { selected.remove(id); persist(); render() }
             })
-            list.addView(row)
+            list.addView(row, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 10 })
         }
         updateTimes()
     }

@@ -2,25 +2,58 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@color/app_background"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
-
-        <TimePicker
-            android:id="@+id/timePicker"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_horizontal" />
+        android:padding="18dp">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="ALARM SETUP"
+            android:textColor="@color/accent_cyan"
+            android:textSize="11sp"
+            android:letterSpacing="0.16"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:text="تنظیم زمان بیداری"
+            android:textColor="@color/text_primary"
+            android:textSize="24sp"
+            android:textStyle="bold" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:background="@drawable/bg_surface_card"
+            android:gravity="center"
+            android:padding="12dp">
+
+            <TimePicker
+                android:id="@+id/timePicker"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:timePickerMode="spinner"
+                android:theme="@style/Theme.AlarmApp" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
             android:text="@string/repeat_days"
+            android:textColor="@color/text_primary"
+            android:textSize="17sp"
             android:textStyle="bold" />
 
         <com.google.android.material.chip.ChipGroup
@@ -29,156 +62,144 @@
             android:layout_marginTop="8dp"
             app:singleLine="false">
 
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipSat"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/day_sat" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipSun"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/day_sun" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipMon"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/day_mon" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipTue"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/day_tue" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipWed"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/day_wed" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipThu"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/day_thu" />
-
-            <com.google.android.material.chip.Chip
-                android:id="@+id/chipFri"
-                style="@style/Widget.MaterialComponents.Chip.Filter"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/day_fri" />
-
+            <com.google.android.material.chip.Chip android:id="@+id/chipSat" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_sat" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipSun" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_sun" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipMon" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_mon" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipTue" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_tue" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipWed" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_wed" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipThu" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_thu" />
+            <com.google.android.material.chip.Chip android:id="@+id/chipFri" style="@style/Widget.MaterialComponents.Chip.Filter" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/day_fri" />
         </com.google.android.material.chip.ChipGroup>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            android:textSize="12sp"
-            android:textColor="#888888"
-            android:text="@string/no_day_selected_hint" />
+            android:text="@string/no_day_selected_hint"
+            android:textColor="@color/text_secondary"
+            android:textSize="12sp" />
 
         <LinearLayout
             android:id="@+id/rowRingtone"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal"
+            android:layout_marginTop="18dp"
+            android:background="@drawable/bg_surface_card"
             android:gravity="center_vertical"
-            android:background="?attr/selectableItemBackground"
-            android:padding="12dp">
+            android:minHeight="64dp"
+            android:orientation="horizontal"
+            android:padding="16dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/ringtone"
+                android:textColor="@color/text_primary"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textRingtone"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
                 android:layout_marginStart="12dp"
+                android:layout_weight="1"
                 android:gravity="end"
-                android:text="@string/default_system_ringtone" />
+                android:text="@string/default_system_ringtone"
+                android:textColor="@color/accent_cyan"
+                android:textSize="13sp" />
         </LinearLayout>
 
         <CheckBox
             android:id="@+id/checkVibrate"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="12dp"
+            android:layout_marginTop="8dp"
+            android:buttonTint="@color/accent_cyan"
             android:checked="true"
-            android:text="@string/vibrate_on_ring" />
+            android:text="@string/vibrate_on_ring"
+            android:textColor="@color/text_primary" />
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:text="نحوه بیدار شدن"
+            android:text="روش خاموش کردن زنگ"
+            android:textColor="@color/text_primary"
+            android:textSize="17sp"
             android:textStyle="bold" />
 
         <RadioGroup
             android:id="@+id/wakeModeGroup"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_surface_card"
             android:orientation="vertical"
-            android:layout_marginTop="6dp">
+            android:padding="12dp">
 
             <RadioButton
                 android:id="@+id/wakeModeNone"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:buttonTint="@color/accent_cyan"
                 android:checked="true"
-                android:text="هیچ‌کدام؛ خاموش کردن معمولی" />
+                android:minHeight="48dp"
+                android:text="خاموش کردن معمولی"
+                android:textColor="@color/text_primary" />
 
             <RadioButton
                 android:id="@+id/wakeModeMath"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="حل ۳ سؤال ریاضی" />
+                android:buttonTint="@color/accent_cyan"
+                android:minHeight="48dp"
+                android:text="حل ۳ سؤال ریاضی"
+                android:textColor="@color/text_primary" />
 
             <RadioButton
                 android:id="@+id/wakeModePhoto"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="گرفتن ۲ عکس از سوژه‌های تصادفی" />
+                android:buttonTint="@color/accent_cyan"
+                android:minHeight="48dp"
+                android:text="گرفتن ۲ عکس از سوژه‌های تصادفی"
+                android:textColor="@color/text_primary" />
         </RadioGroup>
 
         <LinearLayout
             android:id="@+id/mathDifficultyContainer"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_surface_card"
             android:orientation="vertical"
+            android:padding="16dp"
             android:visibility="gone">
 
             <TextView
-                android:layout_width="wrap_content"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="درجه سختی سؤال‌ها" />
+                android:text="درجه سختی سؤال‌ها"
+                android:textColor="@color/text_primary"
+                android:textSize="15sp"
+                android:textStyle="bold" />
 
             <Spinner
                 android:id="@+id/spinnerMathDifficulty"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="52dp"
+                android:layout_marginTop="6dp"
+                android:background="@drawable/bg_input_field"
+                android:paddingHorizontal="12dp" />
         </LinearLayout>
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
             android:text="@string/note_label"
+            android:textColor="@color/text_primary"
+            android:textSize="17sp"
             android:textStyle="bold" />
 
         <EditText
@@ -186,34 +207,38 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:background="@drawable/bg_input_field"
             android:hint="@string/note_hint"
             android:inputType="textMultiLine"
             android:minLines="2"
-            android:background="@android:drawable/edit_text" />
+            android:padding="14dp"
+            android:textColor="@color/text_primary"
+            android:textColorHint="@color/text_secondary" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="28dp"
-            android:orientation="horizontal">
+            android:layout_marginTop="24dp"
+            android:orientation="vertical">
 
-            <Button
-                android:id="@+id/buttonDelete"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginEnd="8dp"
-                android:text="@string/delete_alarm"
-                android:visibility="gone" />
-
-            <Button
+            <com.google.android.material.button.MaterialButton
                 android:id="@+id/buttonSave"
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/save" />
+                android:text="@string/save"
+                android:textColor="@color/app_background"
+                app:backgroundTint="@color/accent_cyan" />
 
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/buttonDelete"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="@string/delete_alarm"
+                android:textColor="@color/danger"
+                app:strokeColor="@color/danger"
+                android:visibility="gone" />
         </LinearLayout>
-
     </LinearLayout>
 </ScrollView>

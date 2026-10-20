@@ -26,12 +26,12 @@ class CountdownTimerActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
             setPadding(24, 24, 24, 24)
-            setBackgroundColor(0xFF080808.toInt())
+            setBackgroundColor(getColor(R.color.app_background))
         }
-        root.addView(TextView(this).apply { text = "تایمر شمارش معکوس"; textSize = 25f; setTextColor(-1) })
+        root.addView(TextView(this).apply { text = "تایمر شمارش معکوس"; textSize = 25f; setTextColor(getColor(R.color.text_primary)) })
         display = TextView(this).apply {
-            text = "00:00"; textSize = 48f; setTextColor(-1); gravity = Gravity.CENTER
-            setPadding(0, 32, 0, 32)
+            text = "00:00"; textSize = 48f; setTextColor(getColor(R.color.accent_cyan)); gravity = Gravity.CENTER
+            setPadding(0, 32, 0, 32); setBackgroundResource(R.drawable.bg_surface_card)
         }
         root.addView(display)
         val pickers = LinearLayout(this).apply { gravity = Gravity.CENTER; orientation = LinearLayout.HORIZONTAL }
@@ -40,10 +40,10 @@ class CountdownTimerActivity : AppCompatActivity() {
         pickers.addView(minutesPicker, LinearLayout.LayoutParams(120, ViewGroup.LayoutParams.WRAP_CONTENT))
         pickers.addView(secondsPicker, LinearLayout.LayoutParams(120, ViewGroup.LayoutParams.WRAP_CONTENT))
         root.addView(pickers)
-        startButton = Button(this).apply { text = "شروع"; setOnClickListener { toggle() } }
+        startButton = Button(this).apply { text = "شروع"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_cyan)); setTextColor(getColor(R.color.app_background)); setOnClickListener { toggle() } }
         root.addView(startButton)
-        root.addView(Button(this).apply { text = "بازنشانی"; setOnClickListener { reset() } })
-        root.addView(Button(this).apply { text = "بازگشت"; setOnClickListener { finish() } })
+        root.addView(Button(this).apply { text = "بازنشانی"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.surface_elevated)); setTextColor(getColor(R.color.text_primary)); setOnClickListener { reset() } })
+        root.addView(Button(this).apply { text = "بازگشت"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.surface_elevated)); setTextColor(getColor(R.color.text_primary)); setOnClickListener { finish() } })
         setContentView(root)
         updateDisplay()
     }

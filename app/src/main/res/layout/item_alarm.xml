@@ -1,18 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:layout_margin="8dp"
-    app:cardCornerRadius="12dp"
-    app:cardElevation="2dp"
-    xmlns:app="http://schemas.android.com/apk/res-auto">
+    android:layout_marginHorizontal="6dp"
+    android:layout_marginVertical="5dp"
+    app:cardBackgroundColor="@color/surface_primary"
+    app:cardCornerRadius="20dp"
+    app:cardElevation="0dp"
+    app:strokeColor="@color/surface_border"
+    app:strokeWidth="1dp">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:padding="16dp">
+        android:orientation="horizontal"
+        android:paddingHorizontal="16dp"
+        android:paddingVertical="15dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -24,38 +29,45 @@
                 android:id="@+id/textTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="28sp"
+                android:fontFamily="sans"
+                android:textColor="@color/text_primary"
+                android:textSize="32sp"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/textDays"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:textColor="#888888" />
+                android:layout_marginTop="3dp"
+                android:textColor="@color/accent_cyan"
+                android:textSize="13sp" />
 
             <TextView
                 android:id="@+id/textLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="13sp"
-                android:textStyle="italic"
-                android:textColor="#555555" />
+                android:layout_marginTop="4dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="13sp" />
         </LinearLayout>
 
         <ImageButton
             android:id="@+id/buttonDelete"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
+            android:layout_width="44dp"
+            android:layout_height="44dp"
+            android:layout_marginEnd="4dp"
             android:background="?attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/delete"
+            android:padding="11dp"
             android:src="@android:drawable/ic_menu_delete"
-            android:contentDescription="@string/delete" />
+            app:tint="@color/danger" />
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switchEnabled"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp" />
-
+            android:layout_marginStart="4dp"
+            app:thumbTint="@color/accent_cyan"
+            app:trackTint="@color/surface_border" />
     </LinearLayout>
 </androidx.cardview.widget.CardView>
