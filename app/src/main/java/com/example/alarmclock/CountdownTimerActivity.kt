@@ -3,7 +3,7 @@ package com.example.alarmclock
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.view.Gravity
-import android.view.View
+import android.view.ViewGroup
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.NumberPicker
@@ -37,7 +37,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         val pickers = LinearLayout(this).apply { gravity = Gravity.CENTER; orientation = LinearLayout.HORIZONTAL }
         minutesPicker = NumberPicker(this).apply { minValue = 0; maxValue = 999; value = 1; wrapSelectorWheel = false }
         secondsPicker = NumberPicker(this).apply { minValue = 0; maxValue = 59; value = 0; wrapSelectorWheel = true }
-        pickers.addView(minutesPicker, LinearLayout.LayoutParams(120, -wrapContent()))
+        pickers.addView(minutesPicker, LinearLayout.LayoutParams(120, ViewGroup.LayoutParams.WRAP_CONTENT))
         pickers.addView(secondsPicker, LinearLayout.LayoutParams(120, -wrapContent()))
         root.addView(pickers)
         startButton = Button(this).apply { text = "شروع"; setOnClickListener { toggle() } }
