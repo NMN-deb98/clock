@@ -2,7 +2,7 @@ name: Build Clock APK
 
 on:
   push:
-    branches: [main, feature/professional-alarm-clock, redesign/premium-clock-ui]
+    branches: [main, feature/professional-alarm-clock, redesign/premium-clock-ui, feature/persian-premium-navigation]
   workflow_dispatch:
 
 permissions:
