@@ -32,6 +32,7 @@ class AlarmRingActivity : AppCompatActivity() {
     private var mathIndex = 0
     private var photoIndex = 0
     private val photoPrompts = listOf("یک کتاب", "یک لیوان", "یک کفش", "یک صندلی", "یک کلید", "یک گیاه", "یک کیف", "یک قاشق", "یک بالش", "یک ساعت")
+    private val usedPhotoPrompts = mutableSetOf<String>()
     private val cameraLauncher = registerForActivityResult(ActivityResultContracts.TakePicturePreview()) { bitmap ->
         if (bitmap == null) {
             AlertDialog.Builder(this).setTitle("عکس ثبت نشد")
@@ -199,7 +200,8 @@ class AlarmRingActivity : AppCompatActivity() {
 
     private fun capturePhoto() {
         if (photoIndex >= 2) { stopAndFinish(); return }
-        val prompt = photoPrompts.shuffled().first()
+        val prompt = photoPrompts.filterNot { it in usedPhotoPrompts }.random()
+        usedPhotoPrompts.add(prompt)
         currentPhotoPrompt = prompt
         AlertDialog.Builder(this)
             .setTitle("چالش عکس ${photoIndex + 1} از ۲")
