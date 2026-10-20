@@ -33,6 +33,8 @@ class AlarmReceiver : BroadcastReceiver() {
                         putExtra("label", alarm.label)
                         putExtra("ringtone_uri", alarm.ringtoneUri)
                         putExtra("vibrate", alarm.vibrate)
+                        putExtra("wake_mode", alarm.wakeMode)
+                        putExtra("math_difficulty", alarm.mathDifficulty)
                     }
                     context.startActivity(ringIntent)
 
