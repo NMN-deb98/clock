@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">هشدار دهنده</string>
+    <string name="app_name">Professional Alarm Clock</string>
     <string name="new_alarm">هشدار جدید</string>
     <string name="edit_alarm">ویرایش هشدار</string>
     <string name="no_alarms_yet">هنوز هشداری تنظیم نشده است</string>
@@ -20,7 +20,6 @@
     <string name="snooze_10">۱۰ دقیقه بعد یادآوری کن</string>
     <string name="dismiss">خاموش کردن</string>
     <string name="alarm_notification_channel_desc">اعلان‌های مربوط به زنگ هشدار</string>
-
     <string name="day_sat">شنبه</string>
     <string name="day_sun">یکشنبه</string>
     <string name="day_mon">دوشنبه</string>

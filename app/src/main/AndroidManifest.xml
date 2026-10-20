@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -17,42 +16,21 @@
         android:theme="@style/Theme.AlarmApp"
         android:supportsRtl="true">
 
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
+        <activity android:name=".MainActivity" android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
-        <activity
-            android:name=".AlarmEditActivity"
-            android:exported="false"
-            android:label="@string/edit_alarm" />
-
-        <activity
-            android:name=".AlarmRingActivity"
-            android:exported="false"
-            android:turnScreenOn="true"
-            android:excludeFromRecents="true" />
-
-        <receiver
-            android:name=".AlarmReceiver"
-            android:exported="false" />
-
-        <receiver
-            android:name=".SnoozeReceiver"
-            android:exported="false" />
-
-        <receiver
-            android:name=".BootReceiver"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
-            </intent-filter>
+        <activity android:name=".AlarmEditActivity" android:exported="false" android:label="@string/edit_alarm" />
+        <activity android:name=".AlarmRingActivity" android:exported="false" android:turnScreenOn="true" android:excludeFromRecents="true" />
+        <activity android:name=".WorldClockActivity" android:exported="false" />
+        <activity android:name=".StopwatchActivity" android:exported="false" />
+        <activity android:name=".CountdownTimerActivity" android:exported="false" />
+        <receiver android:name=".AlarmReceiver" android:exported="false" />
+        <receiver android:name=".SnoozeReceiver" android:exported="false" />
+        <receiver android:name=".BootReceiver" android:exported="true">
+            <intent-filter><action android:name="android.intent.action.BOOT_COMPLETED" /></intent-filter>
         </receiver>
-
     </application>
-
 </manifest>

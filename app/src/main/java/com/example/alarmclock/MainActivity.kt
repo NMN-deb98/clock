@@ -71,6 +71,15 @@ class MainActivity : AppCompatActivity() {
         binding.fabAdd.setOnClickListener {
             startActivity(Intent(this, AlarmEditActivity::class.java))
         }
+        binding.buttonWorldClock.setOnClickListener {
+            startActivity(Intent(this, WorldClockActivity::class.java))
+        }
+        binding.buttonStopwatch.setOnClickListener {
+            startActivity(Intent(this, StopwatchActivity::class.java))
+        }
+        binding.buttonTimer.setOnClickListener {
+            startActivity(Intent(this, CountdownTimerActivity::class.java))
+        }
     }
 
     private fun askNotificationPermissionIfNeeded() {

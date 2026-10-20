@@ -18,7 +18,9 @@ data class Alarm(
     var ringtoneUri: String = "",   // Uri صدای زنگ به صورت رشته
     var ringtoneName: String = "پیش‌فرض سیستم",
     var vibrate: Boolean = true,
-    var enabled: Boolean = true
+    var enabled: Boolean = true,
+    var wakeMode: String = "NONE",
+    var mathDifficulty: String = "MEDIUM"
 ) {
     fun dayList(): List<Int> =
         if (days.isBlank()) emptyList() else days.split(",").map { it.trim().toInt() }
