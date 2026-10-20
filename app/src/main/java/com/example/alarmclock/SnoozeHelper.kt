@@ -15,7 +15,9 @@ object SnoozeHelper {
         minutes: Int,
         label: String,
         ringtoneUri: String,
-        vibrate: Boolean
+        vibrate: Boolean,
+        wakeMode: String = "NONE",
+        mathDifficulty: String = "MEDIUM"
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerTime = Calendar.getInstance().apply {
@@ -27,6 +29,8 @@ object SnoozeHelper {
             putExtra("label", label)
             putExtra("ringtone_uri", ringtoneUri)
             putExtra("vibrate", vibrate)
+            putExtra("wake_mode", wakeMode)
+            putExtra("math_difficulty", mathDifficulty)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -55,6 +59,8 @@ class SnoozeReceiver : BroadcastReceiver() {
             putExtra("label", intent.getStringExtra("label") ?: "")
             putExtra("ringtone_uri", intent.getStringExtra("ringtone_uri") ?: "")
             putExtra("vibrate", intent.getBooleanExtra("vibrate", true))
+            putExtra("wake_mode", intent.getStringExtra("wake_mode") ?: "NONE")
+            putExtra("math_difficulty", intent.getStringExtra("math_difficulty") ?: "MEDIUM")
         }
         context.startActivity(ringIntent)
     }
