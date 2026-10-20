@@ -57,6 +57,9 @@ class AlarmRingActivity : AppCompatActivity() {
     }
 
     private fun startRinging(uriString: String) {
+        // مقدار silent یعنی کاربر عمداً گزینهٔ «بدون صدا» را انتخاب کرده است.
+        if (uriString == "silent") return
+
         val uri: Uri = if (uriString.isNotBlank())
             Uri.parse(uriString)
         else
@@ -102,7 +105,14 @@ class AlarmRingActivity : AppCompatActivity() {
         ringtone?.stop()
         vibrator?.cancel()
         NotificationHelper.cancelNotification(this, alarmId)
-        SnoozeHelper.snooze(this, alarmId, minutes = 10)
+        SnoozeHelper.snooze(
+            this,
+            alarmId,
+            minutes = 10,
+            label = intent.getStringExtra("label") ?: "",
+            ringtoneUri = intent.getStringExtra("ringtone_uri") ?: "",
+            vibrate = intent.getBooleanExtra("vibrate", true)
+        )
         finish()
     }
 
