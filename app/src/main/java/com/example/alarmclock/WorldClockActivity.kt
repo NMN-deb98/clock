@@ -41,10 +41,7 @@ class WorldClockActivity : AppCompatActivity() {
         "کابل · افغانستان" to "Asia/Kabul"
     )
     private val selected = linkedSetOf<String>()
-    private val allZones: Map<String, String> by lazy {
-        val available = TimeZone.getAvailableIDs().associate { it.replace('_', ' ') to it }
-        (available + zones).toSortedMap()
-    }
+    private val allZones: Map<String, String> by lazy { zones.toSortedMap() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -56,7 +53,7 @@ class WorldClockActivity : AppCompatActivity() {
             setBackgroundColor(getColor(R.color.app_background))
         }
         root.addView(TextView(this).apply {
-            text = "ساعت جهانی"; textSize = 27f; setTextColor(getColor(R.color.text_primary)); setPadding(0, 0, 0, 16)
+            text = "ساعت جهانی"; textSize = 27f; setTextColor(getColor(R.color.text_primary)); setPadding(0, 0, 0, 16); gravity = Gravity.END
         })
         spinner = Spinner(this).apply { background = getDrawable(R.drawable.bg_input_field); setPadding(12, 4, 12, 4) }
         val labels = allZones.keys.toList()
@@ -124,7 +121,7 @@ class WorldClockActivity : AppCompatActivity() {
             val column = row.getChildAt(0) as LinearLayout
             val time = column.getChildAt(1) as TextView
             val zone = time.tag as String
-            val formatter = SimpleDateFormat("HH:mm:ss  ·  EEE, dd MMM", Locale.getDefault())
+            val formatter = SimpleDateFormat("HH:mm:ss  ·  EEE، dd MMM", Locale("fa", "IR"))
             formatter.timeZone = TimeZone.getTimeZone(zone)
             time.text = formatter.format(Date())
         }
