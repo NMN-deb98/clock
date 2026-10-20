@@ -110,7 +110,7 @@ class WorldClockActivity : AppCompatActivity() {
                 setTextColor(getColor(R.color.app_background))
                 setOnClickListener { selected.remove(id); persist(); render() }
             })
-            list.addView(row)
+            list.addView(row, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 10 })
         }
         updateTimes()
     }
