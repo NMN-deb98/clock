@@ -53,7 +53,6 @@ class AlarmRingActivity : AppCompatActivity() {
                 WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON
             )
         }
-        window.addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD)
     }
 
     private fun startRinging(uriString: String) {
