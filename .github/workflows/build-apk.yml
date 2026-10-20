@@ -34,6 +34,15 @@ jobs:
       - name: Run Android lint and unit tests
         run: gradle --no-daemon lintDebug testDebugUnitTest
 
+      - name: Upload lint report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: clock-lint-report
+          path: app/build/reports/lint-results-debug.html
+          if-no-files-found: ignore
+          retention-days: 7
+
       - name: Build debug APK
         run: gradle --no-daemon assembleDebug
 
