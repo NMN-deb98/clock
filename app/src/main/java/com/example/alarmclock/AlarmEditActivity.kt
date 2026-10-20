@@ -36,7 +36,7 @@ class AlarmEditActivity : AppCompatActivity() {
                 val ringtone = RingtoneManager.getRingtone(this, uri)
                 selectedRingtoneName = ringtone?.getTitle(this) ?: "صدای انتخاب‌شده"
             } else {
-                selectedRingtoneUri = ""
+                selectedRingtoneUri = "silent"
                 selectedRingtoneName = "بدون صدا"
             }
             binding.textRingtone.text = selectedRingtoneName
