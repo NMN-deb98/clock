@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">هشدار دهنده</string>
+    <string name="new_alarm">هشدار جدید</string>
+    <string name="edit_alarm">ویرایش هشدار</string>
+    <string name="no_alarms_yet">هنوز هشداری تنظیم نشده است</string>
+    <string name="repeat_days">تکرار در روزها</string>
+    <string name="no_day_selected_hint">اگر روزی انتخاب نکنید، هشدار فقط یک‌بار زنگ می‌خورد و سپس حذف می‌شود.</string>
+    <string name="ringtone">صدای زنگ</string>
+    <string name="default_system_ringtone">پیش‌فرض سیستم</string>
+    <string name="vibrate_on_ring">لرزش هنگام زنگ خوردن</string>
+    <string name="note_label">یادداشت</string>
+    <string name="note_hint">مثلاً: قرص یادت نره</string>
+    <string name="delete_alarm">حذف هشدار</string>
+    <string name="save">ذخیره</string>
+    <string name="delete">حذف</string>
+    <string name="one_time_alarm">یک‌بار</string>
+    <string name="alarm_ringing">زمان هشدار رسید!</string>
+    <string name="no_note">بدون یادداشت</string>
+    <string name="snooze_10">۱۰ دقیقه بعد یادآوری کن</string>
+    <string name="dismiss">خاموش کردن</string>
+    <string name="alarm_notification_channel_desc">اعلان‌های مربوط به زنگ هشدار</string>
+
+    <string name="day_sat">شنبه</string>
+    <string name="day_sun">یکشنبه</string>
+    <string name="day_mon">دوشنبه</string>
+    <string name="day_tue">سه‌شنبه</string>
+    <string name="day_wed">چهارشنبه</string>
+    <string name="day_thu">پنجشنبه</string>
+    <string name="day_fri">جمعه</string>
+</resources>

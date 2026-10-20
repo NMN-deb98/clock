@@ -1,0 +1,80 @@
+package com.example.alarmclock
+
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.content.Context
+import android.content.Intent
+import java.util.Calendar
+
+object AlarmScheduler {
+
+    fun schedule(context: Context, alarm: Alarm) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+
+        val triggerTime = nextTriggerTimeMillis(alarm)
+
+        val intent = Intent(context, AlarmReceiver::class.java).apply {
+            putExtra("alarm_id", alarm.id)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            alarm.id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        alarmManager.setAlarmClock(
+            AlarmManager.AlarmClockInfo(triggerTime, pendingIntent),
+            pendingIntent
+        )
+    }
+
+    fun cancel(context: Context, alarm: Alarm) {
+        val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val intent = Intent(context, AlarmReceiver::class.java)
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            alarm.id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        alarmManager.cancel(pendingIntent)
+    }
+
+    /**
+     * زمان بعدی وقوع هشدار را بر اساس ساعت/دقیقه و روزهای انتخاب‌شده محاسبه می‌کند.
+     * اگر هیچ روزی انتخاب نشده باشد، نزدیک‌ترین زمان آینده امروز یا فردا در نظر گرفته می‌شود.
+     */
+    fun nextTriggerTimeMillis(alarm: Alarm): Long {
+        val now = Calendar.getInstance()
+        val days = alarm.dayList()
+
+        val candidate = Calendar.getInstance().apply {
+            set(Calendar.HOUR_OF_DAY, alarm.hour)
+            set(Calendar.MINUTE, alarm.minute)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
+        }
+
+        if (days.isEmpty()) {
+            if (candidate.timeInMillis <= now.timeInMillis) {
+                candidate.add(Calendar.DAY_OF_YEAR, 1)
+            }
+            return candidate.timeInMillis
+        }
+
+        // پیدا کردن نزدیک‌ترین روز از بین روزهای انتخاب‌شده
+        for (i in 0..7) {
+            val check = candidate.clone() as Calendar
+            check.add(Calendar.DAY_OF_YEAR, i)
+            val dayOfWeek = check.get(Calendar.DAY_OF_WEEK)
+            if (days.contains(dayOfWeek)) {
+                if (i == 0 && check.timeInMillis <= now.timeInMillis) continue
+                return check.timeInMillis
+            }
+        }
+        // fallback: یک هفته بعد از امروز با همان ساعت
+        candidate.add(Calendar.DAY_OF_YEAR, 7)
+        return candidate.timeInMillis
+    }
+}
