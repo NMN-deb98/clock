@@ -41,21 +41,19 @@ class WorldClockActivity : AppCompatActivity() {
         "کابل · افغانستان" to "Asia/Kabul"
     )
     private val selected = linkedSetOf<String>()
-    private val allZones: Map<String, String> by lazy {
-        val available = TimeZone.getAvailableIDs().associate { it.replace('_', ' ') to it }
-        (available + zones).toSortedMap()
-    }
+    private val allZones: Map<String, String> by lazy { zones.toSortedMap() }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         selected.addAll(prefs.getStringSet("zones", setOf("Asia/Tehran", "Europe/London", "America/New_York")) ?: emptySet())
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(20, 20, 20, 20)
+            setPadding(24, 24, 24, 24)
+            layoutDirection = android.view.View.LAYOUT_DIRECTION_RTL
             setBackgroundColor(getColor(R.color.app_background))
         }
         root.addView(TextView(this).apply {
-            text = "ساعت جهانی"; textSize = 27f; setTextColor(getColor(R.color.text_primary)); setPadding(0, 0, 0, 16)
+            text = "ساعت جهانی"; textSize = 27f; setTextColor(getColor(R.color.text_primary)); setPadding(0, 0, 0, 16); gravity = Gravity.END
         })
         spinner = Spinner(this).apply { background = getDrawable(R.drawable.bg_input_field); setPadding(12, 4, 12, 4) }
         val labels = allZones.keys.toList()
@@ -90,12 +88,14 @@ class WorldClockActivity : AppCompatActivity() {
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(16, 18, 16, 18)
+                layoutDirection = android.view.View.LAYOUT_DIRECTION_RTL
+                setPadding(18, 20, 18, 20)
                 background = getDrawable(R.drawable.bg_surface_card)
             }
             val time = TextView(this).apply {
-                textSize = 24f
-                setTextColor(-1)
+                textSize = 30f
+                setTextColor(getColor(R.color.accent_cyan))
+                gravity = Gravity.END
                 tag = id
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
             }
@@ -121,7 +121,7 @@ class WorldClockActivity : AppCompatActivity() {
             val column = row.getChildAt(0) as LinearLayout
             val time = column.getChildAt(1) as TextView
             val zone = time.tag as String
-            val formatter = SimpleDateFormat("HH:mm:ss  ·  EEE, dd MMM", Locale.getDefault())
+            val formatter = SimpleDateFormat("HH:mm:ss  ·  EEE، dd MMM", Locale("fa", "IR"))
             formatter.timeZone = TimeZone.getTimeZone(zone)
             time.text = formatter.format(Date())
         }

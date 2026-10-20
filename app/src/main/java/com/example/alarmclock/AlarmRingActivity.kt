@@ -49,6 +49,9 @@ class AlarmRingActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAlarmRingBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        window.decorView.layoutDirection = View.LAYOUT_DIRECTION_RTL
+        window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+            or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
         setShowWhenLockedAndTurnScreenOn()
 
         alarmId = intent.getIntExtra("alarm_id", -1)
@@ -65,10 +68,10 @@ class AlarmRingActivity : AppCompatActivity() {
         if (wakeMode == "MATH") {
             mathQuestions = createQuestions(mathDifficulty)
             binding.textDifficulty.visibility = View.VISIBLE
-            binding.textDifficulty.text = "MATH CHALLENGE  •  ${difficultyLabel(mathDifficulty)}"
-            binding.buttonDismiss.text = "START CHALLENGE"
+            binding.textDifficulty.text = "چالش ریاضی • ${difficultyLabel(mathDifficulty)}"
+            binding.buttonDismiss.text = "شروع چالش"
         } else if (wakeMode == "PHOTO") {
-            binding.buttonDismiss.text = "START PHOTO CHALLENGE"
+            binding.buttonDismiss.text = "شروع چالش عکس"
         }
         binding.buttonDismiss.setOnClickListener {
             when (wakeMode) {
@@ -122,9 +125,9 @@ class AlarmRingActivity : AppCompatActivity() {
     }
 
     private fun difficultyLabel(difficulty: String): String = when (difficulty) {
-        "EASY" -> "EASY"
-        "HARD" -> "HARD"
-        else -> "MEDIUM"
+        "EASY" -> "آسان"
+        "HARD" -> "سخت"
+        else -> "متوسط"
     }
 
     private data class MathQuestion(val prompt: String, val answer: Int)
@@ -171,7 +174,7 @@ class AlarmRingActivity : AppCompatActivity() {
         }
         val question = mathQuestions[mathIndex]
         val input = EditText(this).apply {
-            hint = "Enter your answer"
+            hint = "پاسخ را وارد کن"
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
             setSingleLine(true)
             textSize = 20f
@@ -184,7 +187,7 @@ class AlarmRingActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             setPadding(24, 10, 24, 4)
             addView(TextView(this@AlarmRingActivity).apply {
-                text = "QUESTION  ${mathIndex + 1} / 3"
+                text = "سؤال ${mathIndex + 1} از ۳"
                 textSize = 12f
                 letterSpacing = 0.12f
                 setTextColor(getColor(R.color.accent_cyan))
@@ -197,7 +200,7 @@ class AlarmRingActivity : AppCompatActivity() {
                 setPadding(0, 22, 0, 22)
             })
             addView(TextView(this@AlarmRingActivity).apply {
-                text = "Difficulty: ${difficultyLabel(mathDifficulty)}"
+                text = "درجه سختی: ${difficultyLabel(mathDifficulty)}"
                 textSize = 13f
                 gravity = android.view.Gravity.CENTER
                 setTextColor(getColor(R.color.accent_violet))
@@ -208,10 +211,10 @@ class AlarmRingActivity : AppCompatActivity() {
             ))
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle("Solve to dismiss the alarm")
+            .setTitle("برای خاموش کردن هشدار، مسئله را حل کن")
             .setView(content)
             .setCancelable(false)
-            .setNegativeButton("CHECK ANSWER", null)
+            .setNegativeButton("بررسی پاسخ", null)
             .create()
         dialog.setOnShowListener {
             dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
@@ -223,7 +226,7 @@ class AlarmRingActivity : AppCompatActivity() {
                     dialog.dismiss()
                     if (mathIndex == 3) stopAndFinish() else showMathQuestion()
                 } else {
-                    input.error = "Incorrect answer. Try again."
+                    input.error = "پاسخ درست نیست؛ دوباره تلاش کن."
                     input.text?.clear()
                 }
             }
@@ -242,7 +245,7 @@ class AlarmRingActivity : AppCompatActivity() {
             .setTitle("چالش عکس ${photoIndex + 1} از ۲")
             .setMessage("از این وسیله عکس بگیر: $prompt")
             .setPositiveButton("باز کردن دوربین") { _, _ -> cameraLauncher.launch(null) }
-            .setNegativeButton("بعداً", null)
+            .setNegativeButton("بازگشت به چالش", null)
             .setCancelable(false)
             .show()
     }

@@ -44,6 +44,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         root.addView(startButton)
         root.addView(Button(this).apply { text = "بازنشانی"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.surface_elevated)); setTextColor(getColor(R.color.text_primary)); setOnClickListener { reset() } })
         root.addView(Button(this).apply { text = "بازگشت"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.surface_elevated)); setTextColor(getColor(R.color.text_primary)); setOnClickListener { finish() } })
+        root.layoutDirection = android.view.View.LAYOUT_DIRECTION_RTL
         setContentView(root)
         updateDisplay()
     }

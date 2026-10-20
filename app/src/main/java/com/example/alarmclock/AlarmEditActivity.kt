@@ -56,6 +56,7 @@ class AlarmEditActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivityAlarmEditBinding.inflate(layoutInflater)
         setContentView(binding.root)
+        window.decorView.layoutDirection = android.view.View.LAYOUT_DIRECTION_RTL
 
         viewModel = ViewModelProvider(this)[AlarmViewModel::class.java]
         alarmId = intent.getIntExtra("alarm_id", -1)
