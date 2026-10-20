@@ -5,6 +5,8 @@ import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.View
+import android.widget.ArrayAdapter
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
@@ -61,6 +63,14 @@ class AlarmEditActivity : AppCompatActivity() {
         setupDayToggles()
 
         binding.timePicker.setIs24HourView(true)
+        binding.spinnerMathDifficulty.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_dropdown_item,
+            listOf("آسان", "متوسط", "سخت")
+        )
+        binding.wakeModeGroup.setOnCheckedChangeListener { _, checkedId ->
+            binding.mathDifficultyContainer.visibility =
+                if (checkedId == binding.wakeModeMath.id) View.VISIBLE else View.GONE
+        }
 
         if (alarmId != -1) {
             title = getString(R.string.edit_alarm)
@@ -115,6 +125,14 @@ class AlarmEditActivity : AppCompatActivity() {
         binding.timePicker.minute = alarm.minute
         binding.editNote.setText(alarm.label)
         binding.checkVibrate.isChecked = alarm.vibrate
+        when (alarm.wakeMode) {
+            "MATH" -> binding.wakeModeMath.isChecked = true
+            "PHOTO" -> binding.wakeModePhoto.isChecked = true
+            else -> binding.wakeModeNone.isChecked = true
+        }
+        binding.spinnerMathDifficulty.setSelection(
+            when (alarm.mathDifficulty) { "EASY" -> 0; "HARD" -> 2; else -> 1 }
+        )
 
         selectedRingtoneUri = alarm.ringtoneUri
         selectedRingtoneName = alarm.ringtoneName
@@ -154,6 +172,16 @@ class AlarmEditActivity : AppCompatActivity() {
         val note = binding.editNote.text?.toString()?.trim() ?: ""
         val vibrate = binding.checkVibrate.isChecked
         val daysString = selectedDays.sorted().joinToString(",")
+        val wakeMode = when (binding.wakeModeGroup.checkedRadioButtonId) {
+            binding.wakeModeMath.id -> "MATH"
+            binding.wakeModePhoto.id -> "PHOTO"
+            else -> "NONE"
+        }
+        val mathDifficulty = when (binding.spinnerMathDifficulty.selectedItemPosition) {
+            0 -> "EASY"
+            2 -> "HARD"
+            else -> "MEDIUM"
+        }
 
         val alarm = (existingAlarm ?: Alarm(hour = hour, minute = minute)).copy(
             hour = hour,
@@ -163,7 +191,9 @@ class AlarmEditActivity : AppCompatActivity() {
             ringtoneUri = selectedRingtoneUri,
             ringtoneName = selectedRingtoneName,
             vibrate = vibrate,
-            enabled = true
+            enabled = true,
+            wakeMode = wakeMode,
+            mathDifficulty = mathDifficulty
         )
 
         if (existingAlarm != null) {
