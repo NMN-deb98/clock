@@ -34,10 +34,10 @@ class StopwatchActivity : AppCompatActivity() {
             setPadding(0, 48, 0, 48); setBackgroundResource(R.drawable.bg_surface_card)
         }
         root.addView(display)
-        val buttons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
-        buttons.addView(Button(this).apply { text = "شروع / توقف"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_cyan)); setTextColor(getColor(R.color.app_background)); setOnClickListener { toggle() } })
-        buttons.addView(Button(this).apply { text = "دور"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_violet)); setTextColor(getColor(R.color.app_background)); setOnClickListener { addLap() } })
-        buttons.addView(Button(this).apply { text = "بازنشانی"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.surface_elevated)); setTextColor(getColor(R.color.text_primary)); setOnClickListener { reset() } })
+        val buttons = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(0, 8, 0, 8) }
+        buttons.addView(Button(this).apply { text = "شروع / توقف"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_cyan)); setTextColor(getColor(R.color.app_background)); setOnClickListener { toggle() } }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 6 })
+        buttons.addView(Button(this).apply { text = "ثبت دور"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_violet)); setTextColor(getColor(R.color.app_background)); setOnClickListener { addLap() } }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT).apply { bottomMargin = 6 })
+        buttons.addView(Button(this).apply { text = "بازنشانی"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.surface_elevated)); setTextColor(getColor(R.color.text_primary)); setOnClickListener { reset() } }, LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT))
         root.addView(buttons)
         lapList = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         root.addView(lapList)
