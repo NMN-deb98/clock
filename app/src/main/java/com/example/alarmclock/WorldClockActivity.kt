@@ -51,7 +51,8 @@ class WorldClockActivity : AppCompatActivity() {
         selected.addAll(prefs.getStringSet("zones", setOf("Asia/Tehran", "Europe/London", "America/New_York")) ?: emptySet())
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(20, 20, 20, 20)
+            setPadding(24, 24, 24, 24)
+            layoutDirection = android.view.View.LAYOUT_DIRECTION_RTL
             setBackgroundColor(getColor(R.color.app_background))
         }
         root.addView(TextView(this).apply {
@@ -90,12 +91,14 @@ class WorldClockActivity : AppCompatActivity() {
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
-                setPadding(16, 18, 16, 18)
+                layoutDirection = android.view.View.LAYOUT_DIRECTION_RTL
+                setPadding(18, 20, 18, 20)
                 background = getDrawable(R.drawable.bg_surface_card)
             }
             val time = TextView(this).apply {
-                textSize = 24f
-                setTextColor(-1)
+                textSize = 30f
+                setTextColor(getColor(R.color.accent_cyan))
+                gravity = Gravity.END
                 tag = id
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
             }
