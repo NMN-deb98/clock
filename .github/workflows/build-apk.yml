@@ -26,43 +26,18 @@ jobs:
         with:
           packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
 
-      - name: Extract Android project
-        shell: bash
-        run: |
-          set -euxo pipefail
-          mkdir -p extracted
-          unzip -q "AlarmApp-پروژه-اندروید.zip" -d extracted
-          echo "Archive contents:"
-          find extracted -maxdepth 4 -type f | head -100
-          SETTINGS="$(find extracted -name settings.gradle -o -name settings.gradle.kts | head -1)"
-          if [ -z "$SETTINGS" ]; then
-            echo "Could not find settings.gradle in the uploaded archive"
-            exit 1
-          fi
-          PROJECT_DIR="$(dirname "$SETTINGS")"
-          echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
-          echo "Project root: $PROJECT_DIR"
-
-      - name: Repair known XML namespace issue if present
-        shell: bash
-        run: |
-          set -euxo pipefail
-          LAYOUT="$(find "$PROJECT_DIR" -path '*/res/layout/activity_alarm_edit.xml' | head -1 || true)"
-          if [ -n "$LAYOUT" ] && grep -q 'app:singleLine' "$LAYOUT" && ! grep -q 'xmlns:app=' "$LAYOUT"; then
-            sed -i 's|<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"|<ScrollView xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto"|' "$LAYOUT"
-          fi
+      - name: Set up Gradle 8.2.1
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.2.1'
 
       - name: Build debug APK
-        shell: bash
-        run: |
-          set -euxo pipefail
-          cd "$PROJECT_DIR"
-          gradle --no-daemon assembleDebug
+        run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: clock-debug-apk
-          path: extracted/**/build/outputs/apk/debug/*.apk
+          path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
