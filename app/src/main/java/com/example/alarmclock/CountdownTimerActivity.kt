@@ -38,7 +38,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         minutesPicker = NumberPicker(this).apply { minValue = 0; maxValue = 999; value = 1; wrapSelectorWheel = false }
         secondsPicker = NumberPicker(this).apply { minValue = 0; maxValue = 59; value = 0; wrapSelectorWheel = true }
         pickers.addView(minutesPicker, LinearLayout.LayoutParams(120, ViewGroup.LayoutParams.WRAP_CONTENT))
-        pickers.addView(secondsPicker, LinearLayout.LayoutParams(120, -wrapContent()))
+        pickers.addView(secondsPicker, LinearLayout.LayoutParams(120, ViewGroup.LayoutParams.WRAP_CONTENT))
         root.addView(pickers)
         startButton = Button(this).apply { text = "شروع"; setOnClickListener { toggle() } }
         root.addView(startButton)
