@@ -26,22 +26,22 @@ class StopwatchActivity : AppCompatActivity() {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             setPadding(24, 36, 24, 24)
-            setBackgroundColor(0xFF080808.toInt())
+            setBackgroundColor(getColor(R.color.app_background))
         }
-        root.addView(TextView(this).apply { text = "کرنومتر"; textSize = 26f; setTextColor(-1) })
+        root.addView(TextView(this).apply { text = "کرنومتر"; textSize = 27f; setTextColor(getColor(R.color.text_primary)); setPadding(0, 0, 0, 16) })
         display = TextView(this).apply {
-            text = "00:00.00"; textSize = 42f; setTextColor(-1); gravity = Gravity.CENTER
-            setPadding(0, 48, 0, 48)
+            text = "00:00.00"; textSize = 42f; setTextColor(getColor(R.color.accent_cyan)); gravity = Gravity.CENTER
+            setPadding(0, 48, 0, 48); setBackgroundResource(R.drawable.bg_surface_card)
         }
         root.addView(display)
         val buttons = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
-        buttons.addView(Button(this).apply { text = "شروع / توقف"; setOnClickListener { toggle() } })
-        buttons.addView(Button(this).apply { text = "دور"; setOnClickListener { addLap() } })
-        buttons.addView(Button(this).apply { text = "بازنشانی"; setOnClickListener { reset() } })
+        buttons.addView(Button(this).apply { text = "شروع / توقف"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_cyan)); setTextColor(getColor(R.color.app_background)); setOnClickListener { toggle() } })
+        buttons.addView(Button(this).apply { text = "دور"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_violet)); setTextColor(getColor(R.color.app_background)); setOnClickListener { addLap() } })
+        buttons.addView(Button(this).apply { text = "بازنشانی"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.surface_elevated)); setTextColor(getColor(R.color.text_primary)); setOnClickListener { reset() } })
         root.addView(buttons)
         lapList = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL }
         root.addView(lapList)
-        root.addView(Button(this).apply { text = "بازگشت"; setOnClickListener { finish() } })
+        root.addView(Button(this).apply { text = "بازگشت"; backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.surface_elevated)); setTextColor(getColor(R.color.text_primary)); setOnClickListener { finish() } })
         setContentView(root)
     }
 
@@ -60,7 +60,7 @@ class StopwatchActivity : AppCompatActivity() {
         lap++
         lapList.addView(TextView(this).apply {
             text = String.format(Locale.getDefault(), "دور %d     %s", lap, format(now))
-            textSize = 18f; setTextColor(-1); setPadding(8, 8, 8, 8)
+            textSize = 18f; setTextColor(getColor(R.color.text_primary)); setPadding(14, 12, 14, 12); setBackgroundResource(R.drawable.bg_surface_card)
         }, 0)
     }
     private fun elapsed() = accumulated + if (running) SystemClock.elapsedRealtime() - startedAt else 0L
