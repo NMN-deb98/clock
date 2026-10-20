@@ -126,6 +126,58 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
+            android:text="نحوه بیدار شدن"
+            android:textStyle="bold" />
+
+        <RadioGroup
+            android:id="@+id/wakeModeGroup"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="6dp">
+
+            <RadioButton
+                android:id="@+id/wakeModeNone"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="هیچ‌کدام؛ خاموش کردن معمولی" />
+
+            <RadioButton
+                android:id="@+id/wakeModeMath"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="حل ۳ سؤال ریاضی" />
+
+            <RadioButton
+                android:id="@+id/wakeModePhoto"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="گرفتن ۲ عکس از سوژه‌های تصادفی" />
+        </RadioGroup>
+
+        <LinearLayout
+            android:id="@+id/mathDifficultyContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="درجه سختی سؤال‌ها" />
+
+            <Spinner
+                android:id="@+id/spinnerMathDifficulty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
             android:text="@string/note_label"
             android:textStyle="bold" />
 
