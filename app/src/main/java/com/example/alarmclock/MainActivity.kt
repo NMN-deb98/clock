@@ -77,6 +77,9 @@ class MainActivity : AppCompatActivity() {
         binding.buttonStopwatch.setOnClickListener {
             startActivity(Intent(this, StopwatchActivity::class.java))
         }
+        binding.buttonTimer.setOnClickListener {
+            startActivity(Intent(this, CountdownTimerActivity::class.java))
+        }
     }
 
     private fun askNotificationPermissionIfNeeded() {
