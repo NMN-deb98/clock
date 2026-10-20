@@ -252,6 +252,12 @@ class AlarmRingActivity : AppCompatActivity() {
         finish()
     }
 
+    @Deprecated("Deprecated in Android API; kept to prevent bypassing wake-up challenges")
+    override fun onBackPressed() {
+        if (wakeMode == "NONE") super.onBackPressed()
+        else android.widget.Toast.makeText(this, "برای خاموش کردن هشدار، چالش را کامل کن.", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
     override fun onDestroy() {
         ringtone?.stop()
         vibrator?.cancel()
