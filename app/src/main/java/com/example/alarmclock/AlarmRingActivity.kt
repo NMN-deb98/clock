@@ -11,6 +11,7 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.text.InputType
 import android.view.WindowManager
+import android.view.View
 import android.widget.EditText
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -63,9 +64,11 @@ class AlarmRingActivity : AppCompatActivity() {
 
         if (wakeMode == "MATH") {
             mathQuestions = createQuestions(mathDifficulty)
-            binding.buttonDismiss.text = "حل سؤال‌ها"
+            binding.textDifficulty.visibility = View.VISIBLE
+            binding.textDifficulty.text = "MATH CHALLENGE  •  ${difficultyLabel(mathDifficulty)}"
+            binding.buttonDismiss.text = "START CHALLENGE"
         } else if (wakeMode == "PHOTO") {
-            binding.buttonDismiss.text = "شروع چالش عکس"
+            binding.buttonDismiss.text = "START PHOTO CHALLENGE"
         }
         binding.buttonDismiss.setOnClickListener {
             when (wakeMode) {
@@ -118,6 +121,12 @@ class AlarmRingActivity : AppCompatActivity() {
         }
     }
 
+    private fun difficultyLabel(difficulty: String): String = when (difficulty) {
+        "EASY" -> "EASY"
+        "HARD" -> "HARD"
+        else -> "MEDIUM"
+    }
+
     private data class MathQuestion(val prompt: String, val answer: Int)
 
     private fun createQuestions(difficulty: String): List<MathQuestion> {
@@ -162,40 +171,66 @@ class AlarmRingActivity : AppCompatActivity() {
         }
         val question = mathQuestions[mathIndex]
         val input = EditText(this).apply {
-            hint = "پاسخ عددی"
+            hint = "Enter your answer"
             inputType = InputType.TYPE_CLASS_NUMBER or InputType.TYPE_NUMBER_FLAG_SIGNED
             setSingleLine(true)
+            textSize = 20f
+            setTextColor(getColor(R.color.text_primary))
+            setHintTextColor(getColor(R.color.text_secondary))
+            setPadding(18, 14, 18, 14)
+            background = androidx.core.content.ContextCompat.getDrawable(this@AlarmRingActivity, R.drawable.bg_input_field)
         }
         val content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(24, 8, 24, 0)
+            setPadding(24, 10, 24, 4)
             addView(TextView(this@AlarmRingActivity).apply {
-                text = "سؤال ${mathIndex + 1} از ۳:  ${question.prompt}"
-                textSize = 20f
+                text = "QUESTION  ${mathIndex + 1} / 3"
+                textSize = 12f
+                letterSpacing = 0.12f
+                setTextColor(getColor(R.color.accent_cyan))
             })
-            addView(input)
+            addView(TextView(this@AlarmRingActivity).apply {
+                text = question.prompt
+                textSize = 34f
+                gravity = android.view.Gravity.CENTER
+                setTextColor(getColor(R.color.text_primary))
+                setPadding(0, 22, 0, 22)
+            })
+            addView(TextView(this@AlarmRingActivity).apply {
+                text = "Difficulty: ${difficultyLabel(mathDifficulty)}"
+                textSize = 13f
+                gravity = android.view.Gravity.CENTER
+                setTextColor(getColor(R.color.accent_violet))
+                setPadding(0, 0, 0, 14)
+            })
+            addView(input, LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT
+            ))
         }
         val dialog = AlertDialog.Builder(this)
-            .setTitle("برای خاموش کردن هشدار حل کن")
+            .setTitle("Solve to dismiss the alarm")
             .setView(content)
             .setCancelable(false)
-            .setNegativeButton("بررسی", null)
+            .setNegativeButton("CHECK ANSWER", null)
             .create()
         dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE).setOnClickListener {
+            dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(getColor(R.color.accent_cyan))
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setOnClickListener {
                 val answer = input.text.toString().trim().toIntOrNull()
                 if (answer == question.answer) {
                     mathIndex++
                     dialog.dismiss()
                     if (mathIndex == 3) stopAndFinish() else showMathQuestion()
                 } else {
-                    input.error = "پاسخ درست نیست؛ دوباره تلاش کن"
+                    input.error = "Incorrect answer. Try again."
                     input.text?.clear()
                 }
             }
         }
         dialog.show()
-        dialog.getButton(AlertDialog.BUTTON_NEGATIVE).text = "بررسی پاسخ"
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
+        dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(getColor(R.color.accent_cyan))
     }
 
     private fun capturePhoto() {
