@@ -35,8 +35,7 @@
             android:name=".AlarmRingActivity"
             android:exported="false"
             android:turnScreenOn="true"
-            android:excludeFromRecents="true"
-            android:launchMode="singleInstance" />
+            android:excludeFromRecents="true" />
 
         <receiver
             android:name=".AlarmReceiver"
