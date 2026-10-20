@@ -41,6 +41,10 @@ class WorldClockActivity : AppCompatActivity() {
         "کابل · افغانستان" to "Asia/Kabul"
     )
     private val selected = linkedSetOf<String>()
+    private val allZones: Map<String, String> by lazy {
+        val available = TimeZone.getAvailableIDs().associate { it.replace('_', ' ') to it }
+        (available + zones).toSortedMap()
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,13 +58,13 @@ class WorldClockActivity : AppCompatActivity() {
             text = "ساعت جهانی"; textSize = 26f; setTextColor(-1)
         })
         spinner = Spinner(this)
-        val labels = zones.keys.toList()
+        val labels = allZones.keys.toList()
         spinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
         root.addView(spinner, ViewGroup.LayoutParams(-1, -2))
         root.addView(Button(this).apply {
             text = "افزودن شهر"
             setOnClickListener {
-                val zone = zones[labels[spinner.selectedItemPosition]] ?: return@setOnClickListener
+                val zone = allZones[labels[spinner.selectedItemPosition]] ?: return@setOnClickListener
                 selected.add(zone)
                 persist()
                 render()
@@ -80,7 +84,7 @@ class WorldClockActivity : AppCompatActivity() {
     private fun render() {
         list.removeAllViews()
         selected.forEach { id ->
-            val city = zones.entries.firstOrNull { it.value == id }?.key ?: id
+            val city = allZones.entries.firstOrNull { it.value == id }?.key ?: id
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL
                 gravity = Gravity.CENTER_VERTICAL
