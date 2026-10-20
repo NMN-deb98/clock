@@ -71,7 +71,9 @@ class AlarmRingActivity : AppCompatActivity() {
                 .setUsage(android.media.AudioAttributes.USAGE_ALARM)
                 .setContentType(android.media.AudioAttributes.CONTENT_TYPE_SONIFICATION)
                 .build()
-            isLooping = true
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                isLooping = true
+            }
             play()
         }
     }
