@@ -246,7 +246,9 @@ class AlarmRingActivity : AppCompatActivity() {
         SnoozeHelper.snooze(this, alarmId, minutes = 10,
             label = intent.getStringExtra("label") ?: "",
             ringtoneUri = intent.getStringExtra("ringtone_uri") ?: "",
-            vibrate = intent.getBooleanExtra("vibrate", true))
+            vibrate = intent.getBooleanExtra("vibrate", true),
+            wakeMode = wakeMode,
+            mathDifficulty = mathDifficulty)
         finish()
     }
 
