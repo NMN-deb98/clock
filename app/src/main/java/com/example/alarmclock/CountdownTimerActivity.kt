@@ -249,7 +249,7 @@ class CountdownTimerActivity : AppCompatActivity() {
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
-    private fun toPersian(value: String): String = value.map { if (it in '0'..'9') ('۰'.code + it - '0').toChar() else it }.joinToString("")
+    private fun toPersian(value: String): String = value.map { ch -> if (ch in '0'..'9') ('۰'.code + (ch.code - '0'.code)).toChar() else ch }.joinToString("")
 
     override fun onDestroy() { timer?.cancel(); super.onDestroy() }
 
