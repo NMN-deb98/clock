@@ -25,6 +25,7 @@ import kotlin.math.min
 class CountdownTimerActivity : AppCompatActivity() {
     private lateinit var display: TextView
     private lateinit var status: TextView
+    private lateinit var hoursPicker: NumberPicker
     private lateinit var minutesPicker: NumberPicker
     private lateinit var secondsPicker: NumberPicker
     private lateinit var startButton: Button
@@ -118,18 +119,24 @@ class CountdownTimerActivity : AppCompatActivity() {
             gravity = Gravity.CENTER; setPadding(0, 0, 0, dp(6))
         })
         val labels = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; layoutDirection = View.LAYOUT_DIRECTION_RTL }
+        labels.addView(text("ساعت", 12f, secondary).apply { gravity = Gravity.CENTER }, LinearLayout.LayoutParams(0, -2, 1f))
         labels.addView(text("دقیقه", 12f, secondary).apply { gravity = Gravity.CENTER }, LinearLayout.LayoutParams(0, -2, 1f))
         labels.addView(text("ثانیه", 12f, secondary).apply { gravity = Gravity.CENTER }, LinearLayout.LayoutParams(0, -2, 1f))
         pickerCard.addView(labels)
         val pickers = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; layoutDirection = View.LAYOUT_DIRECTION_RTL }
+        hoursPicker = NumberPicker(this).apply {
+            minValue = 0; maxValue = 100; value = 0; wrapSelectorWheel = false
+            setOnValueChangedListener { _, _, _ -> if (!running) syncFromPickers() }
+        }
         minutesPicker = NumberPicker(this).apply {
-            minValue = 0; maxValue = 999; value = 5; wrapSelectorWheel = false
+            minValue = 0; maxValue = 60; value = 5; wrapSelectorWheel = false
             setOnValueChangedListener { _, _, _ -> if (!running) syncFromPickers() }
         }
         secondsPicker = NumberPicker(this).apply {
-            minValue = 0; maxValue = 59; value = 0; wrapSelectorWheel = true
+            minValue = 0; maxValue = 60; value = 0; wrapSelectorWheel = false
             setOnValueChangedListener { _, _, _ -> if (!running) syncFromPickers() }
         }
+        pickers.addView(hoursPicker, LinearLayout.LayoutParams(0, dp(90), 1f))
         pickers.addView(minutesPicker, LinearLayout.LayoutParams(0, dp(90), 1f))
         pickers.addView(secondsPicker, LinearLayout.LayoutParams(0, dp(90), 1f))
         pickerCard.addView(pickers)
@@ -163,7 +170,7 @@ class CountdownTimerActivity : AppCompatActivity() {
 
     private fun syncFromPickers() {
         if (running) return
-        remainingMs = (minutesPicker.value * 60L + secondsPicker.value) * 1000L
+        remainingMs = (hoursPicker.value * 3600L + minutesPicker.value * 60L + secondsPicker.value) * 1000L
         totalDurationMs = remainingMs; completed = false
         updateDisplay(); updateControls()
     }
@@ -209,7 +216,15 @@ class CountdownTimerActivity : AppCompatActivity() {
     private fun updateDisplay() {
         val seconds = if (remainingMs > 0L) (remainingMs + 999L) / 1000L
             else if (completed) 0L else minutesPicker.value * 60L + secondsPicker.value
-        display.text = toPersian(String.format(Locale.US, "%02d:%02d", seconds / 60L, seconds % 60L))
+        val hours = seconds / 3600L
+        val minutes = (seconds % 3600L) / 60L
+        val secs = seconds % 60L
+        val formatted = if (hours > 0L) String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, secs)
+            else String.format(Locale.US, "%02d:%02d", minutes, secs)
+        display.text = toPersian(formatted)
+        val hue = ((android.os.SystemClock.uptimeMillis() / 40L) % 360L).toFloat()
+        display.setTextColor(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.72f, 1f)))
+        ring.setLiveColor(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.8f, 1f)))
         ring.setProgress(if (totalDurationMs > 0L) remainingMs.toFloat() / totalDurationMs else 1f)
         status.text = when {
             completed -> "پایان زمان"
@@ -229,7 +244,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         }
         startButton.backgroundTintList = ColorStateList.valueOf(if (running) violet else cyan)
         startButton.setTextColor(bg)
-        minutesPicker.isEnabled = !running; secondsPicker.isEnabled = !running
+        hoursPicker.isEnabled = !running; minutesPicker.isEnabled = !running; secondsPicker.isEnabled = !running
     }
 
     private fun actionButton(label: String, color: Int, textColor: Int) = Button(this).apply {
@@ -260,15 +275,17 @@ class CountdownTimerActivity : AppCompatActivity() {
         private var trackColor = 0
         private var activeColor = 0
         private var doneColor = 0
+        private var liveColor = 0
         private var progress = 1f
-        fun setColors(track: Int, active: Int, done: Int) { trackColor = track; activeColor = active; doneColor = done; invalidate() }
+        fun setColors(track: Int, active: Int, done: Int) { trackColor = track; activeColor = active; doneColor = done; liveColor = active; invalidate() }
+        fun setLiveColor(color: Int) { liveColor = color; invalidate() }
         fun setProgress(value: Float) { progress = value.coerceIn(0f, 1f); invalidate() }
         override fun onDraw(canvas: Canvas) {
             super.onDraw(canvas)
             val stroke = dp(9).toFloat(); val side = min(width, height).toFloat(); val inset = stroke / 2 + dp(8)
             bounds.set((width-side)/2+inset, (height-side)/2+inset, (width+side)/2-inset, (height+side)/2-inset)
             track.color = trackColor; track.strokeWidth = stroke
-            arc.color = if (completed) doneColor else activeColor; arc.strokeWidth = stroke
+            arc.color = if (completed) doneColor else liveColor; arc.strokeWidth = stroke
             canvas.drawArc(bounds, -90f, 360f, false, track)
             if (progress > 0f) canvas.drawArc(bounds, -90f, 360f * progress, false, arc)
         }
