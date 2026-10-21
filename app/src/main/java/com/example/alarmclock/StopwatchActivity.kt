@@ -286,7 +286,11 @@ class StopwatchActivity : AppCompatActivity() {
     }
 
     private fun elapsed() = accumulated + if (running) SystemClock.elapsedRealtime() - startedAt else 0L
-    private fun updateDisplay() { display.text = format(elapsed()) }
+    private fun updateDisplay() {
+        display.text = format(elapsed())
+        val hue = ((android.os.SystemClock.uptimeMillis() / 40L) % 360L).toFloat()
+        display.setTextColor(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.72f, 1f)))
+    }
 
     private fun format(ms: Long): String {
         val centis = (ms / 10) % 100
