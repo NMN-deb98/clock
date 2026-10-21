@@ -198,6 +198,9 @@ class AlarmRingActivity : AppCompatActivity() {
             })
             addView(TextView(this@AlarmRingActivity).apply {
                 text = question.prompt
+                // Keep arithmetic in left-to-right order even inside the Persian RTL interface.
+                textDirection = View.TEXT_DIRECTION_LTR
+                textAlignment = View.TEXT_ALIGNMENT_CENTER
                 textSize = 34f
                 gravity = android.view.Gravity.CENTER
                 setTextColor(getColor(R.color.text_primary))
