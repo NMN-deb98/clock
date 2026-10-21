@@ -104,18 +104,8 @@ class WorldClockActivity : AppCompatActivity() {
         val parts = id.split('/')
         val city = parts.last().replace('_', ' ').replace('-', ' ')
         val region = parts.first().replace('_', ' ')
-        val regionFa = when (region) {
-            "Asia" -> "آسیا"
-            "Europe" -> "اروپا"
-            "Africa" -> "آفریقا"
-            "America" -> "قاره آمریکا"
-            "Australia" -> "استرالیا"
-            "Pacific" -> "اقیانوسیه"
-            "Atlantic" -> "اقیانوس اطلس"
-            "Indian" -> "اقیانوس هند"
-            "Antarctica" -> "جنوبگان"
-            else -> region
-        }
+        // Avoid presenting a continent as if it were the country.
+        val country = countryForZone(id)
         val known = mapOf(
             "Asia/Tehran" to "تهران · ایران 🇮🇷",
             "Europe/Istanbul" to "استانبول · ترکیه 🇹🇷",
@@ -148,7 +138,30 @@ class WorldClockActivity : AppCompatActivity() {
             "Africa/Johannesburg" to "ژوهانسبورگ · آفریقای جنوبی 🇿🇦",
             "Pacific/Auckland" to "اوکلند · نیوزیلند 🇳🇿"
         )
-        return known[id] ?: "$city · $regionFa"
+        return known[id] ?: if (country != null) "$city · ${country.first} ${country.second}" else "$city · منطقهٔ زمانی $region"
+    }
+
+    private fun countryForZone(id: String): Pair<String, String>? {
+        val countryByZone = mapOf(
+            "Asia/Tehran" to ("ایران" to "🇮🇷"), "Europe/Istanbul" to ("ترکیه" to "🇹🇷"),
+            "Europe/London" to ("بریتانیا" to "🇬🇧"), "Europe/Paris" to ("فرانسه" to "🇫🇷"),
+            "Europe/Berlin" to ("آلمان" to "🇩🇪"), "Europe/Rome" to ("ایتالیا" to "🇮🇹"),
+            "Europe/Madrid" to ("اسپانیا" to "🇪🇸"), "Europe/Amsterdam" to ("هلند" to "🇳🇱"),
+            "Europe/Moscow" to ("روسیه" to "🇷🇺"), "America/New_York" to ("آمریکا" to "🇺🇸"),
+            "America/Los_Angeles" to ("آمریکا" to "🇺🇸"), "America/Chicago" to ("آمریکا" to "🇺🇸"),
+            "America/Toronto" to ("کانادا" to "🇨🇦"), "America/Vancouver" to ("کانادا" to "🇨🇦"),
+            "Asia/Dubai" to ("امارات" to "🇦🇪"), "Asia/Tokyo" to ("ژاپن" to "🇯🇵"),
+            "Asia/Seoul" to ("کره جنوبی" to "🇰🇷"), "Asia/Kolkata" to ("هند" to "🇮🇳"),
+            "Australia/Sydney" to ("استرالیا" to "🇦🇺"), "Asia/Singapore" to ("سنگاپور" to "🇸🇬"),
+            "Asia/Riyadh" to ("عربستان سعودی" to "🇸🇦"), "Asia/Kabul" to ("افغانستان" to "🇦🇫"),
+            "Asia/Shanghai" to ("چین" to "🇨🇳"), "Asia/Hong_Kong" to ("هنگ‌کنگ" to "🇭🇰"),
+            "Asia/Bangkok" to ("تایلند" to "🇹🇭"), "Asia/Jakarta" to ("اندونزی" to "🇮🇩"),
+            "America/Sao_Paulo" to ("برزیل" to "🇧🇷"), "Africa/Cairo" to ("مصر" to "🇪🇬"),
+            "Africa/Johannesburg" to ("آفریقای جنوبی" to "🇿🇦"), "Pacific/Auckland" to ("نیوزیلند" to "🇳🇿")
+        )
+        countryByZone[id]?.let { return it }
+        val prefixes = listOf("America/" to ("آمریکا" to "🇺🇸"), "Australia/" to ("استرالیا" to "🇦🇺"))
+        return prefixes.firstOrNull { id.startsWith(it.first) }?.second
     }
 
     private fun persist() {
