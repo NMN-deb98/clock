@@ -100,10 +100,7 @@ class WorldClockActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         selected.addAll(prefs.getStringSet("zones", setOf("Asia/Tehran", "Europe/London", "America/New_York")) ?: emptySet())
-        val validZones = allZones.map { it.id }.toSet()
-        selected.retainAll(validZones)
-
-        val root = LinearLayout(this).apply {
+val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(20, 20, 20, 14)
             layoutDirection = View.LAYOUT_DIRECTION_RTL
@@ -245,7 +242,8 @@ class WorldClockActivity : AppCompatActivity() {
             setPadding(16, 32, 16, 32)
         })
         selected.forEach { id ->
-            val zone = allZones.firstOrNull { it.id == id } ?: return@forEach
+            val zone = allZones.firstOrNull { it.id == id }
+                ?: ZoneChoice(id, id.substringAfterLast('/').replace('_', ' '), "")
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
                 layoutDirection = View.LAYOUT_DIRECTION_RTL; setPadding(14, 14, 14, 14)
