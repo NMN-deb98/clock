@@ -56,11 +56,11 @@ jobs:
           if-no-files-found: error
           retention-days: 30
       - name: Update Hooshyar v1.0.62 release notes
-        if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'docs(release): document Hooshyar changes')
+        if: "github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'docs(release): document Hooshyar changes')"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release edit v1.0.62 --repo "${{ github.repository }}" --title "Hooshyar v1.0.62" --notes-file - <<'NOTES'
+          cat > release-notes.md <<'NOTES'
           ## تغییرات نسخه هوشیار (Hooshyar) — v1.0.62
 
           ### تغییرات اصلی
@@ -80,16 +80,16 @@ jobs:
 
           > توجه: موفقیت ساخت و تست‌های خودکار به معنی آزمایش کامل روی همه مدل‌های گوشی نیست. عملکرد آلارم، صفحه قفل و نمایش ریاضی را پس از نصب روی دستگاه خود نیز بررسی کنید.
           NOTES
+          sed -i 's/^          //' release-notes.md
+          gh release edit v1.0.62 --repo "${{ github.repository }}" --title "Hooshyar v1.0.62" --notes-file release-notes.md
       - name: Publish Hooshyar APK to GitHub Release
-        if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'docs(release): document Hooshyar changes')
+        if: "github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'docs(release): document Hooshyar changes')"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           TAG="v1.0.${{ github.run_number }}"
-          gh release create "$TAG" "Hooshyar-v1.0.${{ github.run_number }}.apk" \
-            --repo "${{ github.repository }}" \
-            --title "Hooshyar $TAG" \
-            --notes "## تغییرات نسخه هوشیار (Hooshyar)
+          cat > release-notes.md <<'NOTES'
+          ## تغییرات نسخه هوشیار (Hooshyar)
 
           - یکدست‌سازی نام برنامه به «هوشیار» و Hooshyar
           - اصلاح جهت نمایش عبارت‌های ریاضی برای خوانش درست در رابط فارسی
@@ -98,4 +98,10 @@ jobs:
           - اصلاحات کد تایمر و کرنومتر
           - بررسی‌های Android lint و تست‌های واحد با موفقیت اجرا شدند
 
-          **توجه:** ساخت و تست خودکار موفق بوده؛ رفتار روی همه دستگاه‌ها به‌صورت فیزیکی تأیید نشده است."
+          **توجه:** ساخت و تست خودکار موفق بوده؛ رفتار روی همه دستگاه‌ها به‌صورت فیزیکی تأیید نشده است.
+          NOTES
+          sed -i 's/^          //' release-notes.md
+          gh release create "$TAG" "Hooshyar-v1.0.${{ github.run_number }}.apk" \
+            --repo "${{ github.repository }}" \
+            --title "Hooshyar $TAG" \
+            --notes-file release-notes.md
