@@ -57,6 +57,8 @@ class AlarmRingActivity : AppCompatActivity() {
         window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
             or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
         setShowWhenLockedAndTurnScreenOn()
+        @Suppress("DEPRECATION")
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
 
         alarmId = intent.getIntExtra("alarm_id", -1)
         val label = intent.getStringExtra("label") ?: ""

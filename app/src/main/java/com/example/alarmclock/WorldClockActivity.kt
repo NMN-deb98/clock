@@ -11,6 +11,7 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Spinner
+import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -23,6 +24,9 @@ class WorldClockActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var list: LinearLayout
     private lateinit var spinner: Spinner
+    private lateinit var searchInput: EditText
+    private lateinit var zoneAdapter: ArrayAdapter<String>
+    private var filteredZones: List<ZoneChoice> = emptyList()
     private val prefs by lazy { getSharedPreferences("world_clocks", MODE_PRIVATE) }
 
     // Use the device's complete IANA time-zone database rather than a short hard-coded list.
@@ -64,19 +68,51 @@ class WorldClockActivity : AppCompatActivity() {
             gravity = Gravity.END
         })
 
+        searchInput = EditText(this).apply {
+            hint = "جست‌وجوی شهر یا کشور…"
+            textSize = 14f
+            setSingleLine(true)
+            layoutDirection = View.LAYOUT_DIRECTION_RTL
+            background = getDrawable(R.drawable.bg_input_field)
+            setPadding(16, 10, 16, 10)
+            setTextColor(getColor(R.color.text_primary))
+            setHintTextColor(getColor(R.color.text_secondary))
+        }
+        root.addView(searchInput, ViewGroup.LayoutParams(-1, -2))
+
         spinner = Spinner(this).apply {
             background = getDrawable(R.drawable.bg_input_field)
             setPadding(12, 4, 12, 4)
         }
-        val labels = allZones.map { it.label }
-        spinner.adapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, labels)
+        filteredZones = allZones
+        zoneAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, filteredZones.map { it.label })
+        spinner.adapter = zoneAdapter
         root.addView(spinner, ViewGroup.LayoutParams(-1, -2))
+        searchInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val query = s?.toString()?.trim().orEmpty()
+                filteredZones = if (query.isEmpty()) allZones else allZones.filter { choice ->
+                    choice.label.contains(query, ignoreCase = true) ||
+                    choice.id.contains(query, ignoreCase = true) ||
+                    countryForZone(choice.id)?.first?.contains(query, ignoreCase = true) == true ||
+                    localizedSearchTerms(choice.id).any { it.contains(query, ignoreCase = true) }
+                }
+                zoneAdapter.clear()
+                zoneAdapter.addAll(filteredZones.map { it.label })
+                zoneAdapter.notifyDataSetChanged()
+                if (filteredZones.isEmpty()) {
+                    Toast.makeText(this@WorldClockActivity, "شهر یا کشور موردنظر پیدا نشد.", Toast.LENGTH_SHORT).show()
+                }
+            }
+            override fun afterTextChanged(s: android.text.Editable?) = Unit
+        })
         root.addView(Button(this).apply {
             text = "＋ افزودن شهر"
             backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_cyan))
             setTextColor(getColor(R.color.app_background))
             setOnClickListener {
-                val choice = allZones.getOrNull(spinner.selectedItemPosition) ?: return@setOnClickListener
+                val choice = filteredZones.getOrNull(spinner.selectedItemPosition) ?: return@setOnClickListener
                 if (!selected.add(choice.id)) {
                     Toast.makeText(this@WorldClockActivity, "این شهر قبلاً اضافه شده است.", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
@@ -104,18 +140,8 @@ class WorldClockActivity : AppCompatActivity() {
         val parts = id.split('/')
         val city = parts.last().replace('_', ' ').replace('-', ' ')
         val region = parts.first().replace('_', ' ')
-        val regionFa = when (region) {
-            "Asia" -> "آسیا"
-            "Europe" -> "اروپا"
-            "Africa" -> "آفریقا"
-            "America" -> "قاره آمریکا"
-            "Australia" -> "استرالیا"
-            "Pacific" -> "اقیانوسیه"
-            "Atlantic" -> "اقیانوس اطلس"
-            "Indian" -> "اقیانوس هند"
-            "Antarctica" -> "جنوبگان"
-            else -> region
-        }
+        // Avoid presenting a continent as if it were the country.
+        val country = countryForZone(id)
         val known = mapOf(
             "Asia/Tehran" to "تهران · ایران 🇮🇷",
             "Europe/Istanbul" to "استانبول · ترکیه 🇹🇷",
@@ -148,7 +174,49 @@ class WorldClockActivity : AppCompatActivity() {
             "Africa/Johannesburg" to "ژوهانسبورگ · آفریقای جنوبی 🇿🇦",
             "Pacific/Auckland" to "اوکلند · نیوزیلند 🇳🇿"
         )
-        return known[id] ?: "$city · $regionFa"
+        return known[id] ?: if (country != null) "$city · ${country.first} ${country.second}" else "$city · منطقهٔ زمانی $region"
+    }
+
+    private fun localizedSearchTerms(id: String): List<String> {
+        val terms = mapOf(
+            "Asia/Tehran" to listOf("تهران", "ایران", "tehran", "iran"),
+            "Europe/Istanbul" to listOf("استانبول", "ترکیه", "istanbul", "turkey", "türkiye"),
+            "Europe/London" to listOf("لندن", "بریتانیا", "انگلستان", "london", "uk", "england"),
+            "Europe/Paris" to listOf("پاریس", "فرانسه", "paris", "france"),
+            "America/New_York" to listOf("نیویورک", "آمریکا", "new york", "usa", "united states"),
+            "America/Los_Angeles" to listOf("لس آنجلس", "los angeles", "usa"),
+            "Asia/Tokyo" to listOf("توکیو", "ژاپن", "tokyo", "japan"),
+            "Asia/Dubai" to listOf("دبی", "امارات", "dubai", "uae", "united arab emirates"),
+            "Asia/Kolkata" to listOf("دهلی", "هند", "delhi", "india"),
+            "Europe/Berlin" to listOf("برلین", "آلمان", "berlin", "germany"),
+            "Europe/Rome" to listOf("رم", "ایتالیا", "rome", "italy"),
+            "Europe/Moscow" to listOf("مسکو", "روسیه", "moscow", "russia"),
+            "Asia/Shanghai" to listOf("شانگهای", "چین", "shanghai", "china")
+        )
+        return terms[id].orEmpty()
+    }
+
+    private fun countryForZone(id: String): Pair<String, String>? {
+        val countryByZone = mapOf(
+            "Asia/Tehran" to ("ایران" to "🇮🇷"), "Europe/Istanbul" to ("ترکیه" to "🇹🇷"),
+            "Europe/London" to ("بریتانیا" to "🇬🇧"), "Europe/Paris" to ("فرانسه" to "🇫🇷"),
+            "Europe/Berlin" to ("آلمان" to "🇩🇪"), "Europe/Rome" to ("ایتالیا" to "🇮🇹"),
+            "Europe/Madrid" to ("اسپانیا" to "🇪🇸"), "Europe/Amsterdam" to ("هلند" to "🇳🇱"),
+            "Europe/Moscow" to ("روسیه" to "🇷🇺"), "America/New_York" to ("آمریکا" to "🇺🇸"),
+            "America/Los_Angeles" to ("آمریکا" to "🇺🇸"), "America/Chicago" to ("آمریکا" to "🇺🇸"),
+            "America/Toronto" to ("کانادا" to "🇨🇦"), "America/Vancouver" to ("کانادا" to "🇨🇦"),
+            "Asia/Dubai" to ("امارات" to "🇦🇪"), "Asia/Tokyo" to ("ژاپن" to "🇯🇵"),
+            "Asia/Seoul" to ("کره جنوبی" to "🇰🇷"), "Asia/Kolkata" to ("هند" to "🇮🇳"),
+            "Australia/Sydney" to ("استرالیا" to "🇦🇺"), "Asia/Singapore" to ("سنگاپور" to "🇸🇬"),
+            "Asia/Riyadh" to ("عربستان سعودی" to "🇸🇦"), "Asia/Kabul" to ("افغانستان" to "🇦🇫"),
+            "Asia/Shanghai" to ("چین" to "🇨🇳"), "Asia/Hong_Kong" to ("هنگ‌کنگ" to "🇭🇰"),
+            "Asia/Bangkok" to ("تایلند" to "🇹🇭"), "Asia/Jakarta" to ("اندونزی" to "🇮🇩"),
+            "America/Sao_Paulo" to ("برزیل" to "🇧🇷"), "Africa/Cairo" to ("مصر" to "🇪🇬"),
+            "Africa/Johannesburg" to ("آفریقای جنوبی" to "🇿🇦"), "Pacific/Auckland" to ("نیوزیلند" to "🇳🇿")
+        )
+        countryByZone[id]?.let { return it }
+        val prefixes = listOf("America/" to ("آمریکا" to "🇺🇸"), "Australia/" to ("استرالیا" to "🇦🇺"))
+        return prefixes.firstOrNull { id.startsWith(it.first) }?.second
     }
 
     private fun persist() {
