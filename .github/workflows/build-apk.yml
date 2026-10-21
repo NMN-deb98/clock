@@ -2,7 +2,7 @@ name: Build Hooshyar APK
 
 on:
   push:
-    branches: [main, feature/professional-alarm-clock, redesign/premium-clock-ui, feature/persian-premium-navigation, feature/hooshyar-name-math-rtl, fix/hooshyar-worldclock-timer-rgb-lockscreen, fix/hooshyar-alarm-lockscreen-worldclock-ui]
+    branches: [main, feature/professional-alarm-clock, redesign/premium-clock-ui, feature/persian-premium-navigation, feature/hooshyar-name-math-rtl, fix/hooshyar-worldclock-timer-rgb-lockscreen, fix/hooshyar-alarm-lockscreen-worldclock-ui, fix/hooshyar-worldclock-crash-lockscreen-alarm]
   workflow_dispatch:
 
 permissions:
