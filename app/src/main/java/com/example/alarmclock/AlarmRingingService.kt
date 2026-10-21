@@ -4,6 +4,7 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.media.AudioAttributes
+import android.media.AudioManager
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
@@ -16,6 +17,8 @@ import android.os.VibratorManager
 class AlarmRingingService : Service() {
     private var ringtone: Ringtone? = null
     private var vibrator: Vibrator? = null
+    private var audioManager: AudioManager? = null
+    private var audioFocusRequest: android.media.AudioFocusRequest? = null
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -48,14 +51,30 @@ class AlarmRingingService : Service() {
     private fun startPlayback(uriString: String, shouldVibrate: Boolean) {
         stopPlayback()
         if (uriString != "silent") {
-            val uri: Uri = if (uriString.isNotBlank()) Uri.parse(uriString)
-            else RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM)
+            val attributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()
+            audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                audioFocusRequest = android.media.AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+                    .setAudioAttributes(attributes)
+                    .setAcceptsDelayedFocusGain(false)
+                    .setOnAudioFocusChangeListener { }
+                    .build()
+                audioManager?.requestAudioFocus(audioFocusRequest!!)
+            } else {
+                @Suppress("DEPRECATION")
+                audioManager?.requestAudioFocus(null, AudioManager.STREAM_ALARM, AudioManager.AUDIOFOCUS_GAIN_TRANSIENT)
+            }
+            val defaultUri = RingtoneManager.getActualDefaultRingtoneUri(this, RingtoneManager.TYPE_ALARM)
                 ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            ringtone = RingtoneManager.getRingtone(this, uri)?.apply {
-                audioAttributes = AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
-                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build()
+                ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+            val requestedUri = if (uriString.isNotBlank()) runCatching { Uri.parse(uriString) }.getOrNull() else defaultUri
+            val requestedTone = requestedUri?.let { runCatching { RingtoneManager.getRingtone(this, it) }.getOrNull() }
+            val selectedTone = requestedTone ?: defaultUri?.let { runCatching { RingtoneManager.getRingtone(this, it) }.getOrNull() }
+            ringtone = selectedTone?.apply {
+                audioAttributes = attributes
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) isLooping = true
-                play()
+                runCatching { play() }
             }
         }
         if (shouldVibrate) {
@@ -79,6 +98,14 @@ class AlarmRingingService : Service() {
         ringtone = null
         vibrator?.cancel()
         vibrator = null
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            audioFocusRequest?.let { audioManager?.abandonAudioFocusRequest(it) }
+            audioFocusRequest = null
+        } else {
+            @Suppress("DEPRECATION")
+            audioManager?.abandonAudioFocus(null)
+        }
+        audioManager = null
     }
 
     override fun onDestroy() {

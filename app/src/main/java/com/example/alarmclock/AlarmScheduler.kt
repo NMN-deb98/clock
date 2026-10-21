@@ -10,11 +10,20 @@ object AlarmScheduler {
 
     fun schedule(context: Context, alarm: Alarm) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-
         val triggerTime = nextTriggerTimeMillis(alarm)
 
+        // Include a snapshot of the alarm in the broadcast so playback can start
+        // immediately. The receiver can read Room asynchronously afterward to
+        // confirm the alarm is still enabled and schedule its next occurrence.
         val intent = Intent(context, AlarmReceiver::class.java).apply {
             putExtra("alarm_id", alarm.id)
+            putExtra("alarm_enabled_snapshot", alarm.enabled)
+            putExtra("label", alarm.label)
+            putExtra("ringtone_uri", alarm.ringtoneUri)
+            putExtra("vibrate", alarm.vibrate)
+            putExtra("wake_mode", alarm.wakeMode)
+            putExtra("math_difficulty", alarm.mathDifficulty)
+            putExtra("delete_after_ringing", alarm.deleteAfterRinging)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -23,10 +32,22 @@ object AlarmScheduler {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 
-        alarmManager.setAlarmClock(
-            AlarmManager.AlarmClockInfo(triggerTime, pendingIntent),
-            pendingIntent
-        )
+        try {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S &&
+                !alarmManager.canScheduleExactAlarms()
+            ) {
+                // Do not silently replace a precise alarm with an inexact one.
+                // MainActivity requests this special access from the user.
+                return
+            }
+            alarmManager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(triggerTime, pendingIntent),
+                pendingIntent
+            )
+        } catch (_: SecurityException) {
+            // Exact-alarm access may be revoked between the check and scheduling.
+            // Never crash the UI; the permission flow can restore scheduling.
+        }
     }
 
     fun cancel(context: Context, alarm: Alarm) {
@@ -63,7 +84,6 @@ object AlarmScheduler {
             return candidate.timeInMillis
         }
 
-        // پیدا کردن نزدیک‌ترین روز از بین روزهای انتخاب‌شده
         for (i in 0..7) {
             val check = candidate.clone() as Calendar
             check.add(Calendar.DAY_OF_YEAR, i)
@@ -73,7 +93,6 @@ object AlarmScheduler {
                 return check.timeInMillis
             }
         }
-        // fallback: یک هفته بعد از امروز با همان ساعت
         candidate.add(Calendar.DAY_OF_YEAR, 7)
         return candidate.timeInMillis
     }

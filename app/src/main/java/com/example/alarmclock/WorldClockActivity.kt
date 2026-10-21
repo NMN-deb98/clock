@@ -42,7 +42,7 @@ class WorldClockActivity : AppCompatActivity() {
             .distinct()
             .map { id ->
                 val parts = id.split('/')
-                ZoneChoice(id, parts.last().replace('_', ' ').replace('-', ' '), runCatching { IcuTimeZone.getRegion(id) }.getOrDefault("001"))
+                ZoneChoice(id, parts.last().replace('_', ' ').replace('-', ' '), runCatching { IcuTimeZone.getRegion(id) }.getOrNull() ?: "001")
             }
             .filter { it.countryCode.matches(Regex("[A-Z]{2}")) && it.countryCode != "ZZ" }
             .toList()
@@ -122,7 +122,7 @@ class WorldClockActivity : AppCompatActivity() {
                 if (filteredCountries.isEmpty()) {
                     citiesForCountry = emptyList()
                     refreshCities()
-                    Toast.makeText(this@WorldClockActivity, "کشوری با این نام پیدا نشد.", Toast.LENGTH_SHORT).show()
+                    // Leave the empty result visible while the user continues typing.
                 } else {
                     val preserved = filteredCountries.indexOfFirst { it.code == previousCode }.takeIf { it >= 0 } ?: 0
                     countrySpinner.setSelection(preserved)
@@ -184,7 +184,7 @@ class WorldClockActivity : AppCompatActivity() {
         .replace('ي', 'ی').replace('ك', 'ک').replace(Regex("\\s+"), " ")
 
     private fun countryForZone(id: String): CountryChoice? {
-        val code = allZones.firstOrNull { it.id == id }?.countryCode ?: return null
+        val code = runCatching { allZones.firstOrNull { it.id == id }?.countryCode }.getOrNull() ?: return null
         return allCountries.firstOrNull { it.code == code }
     }
 
