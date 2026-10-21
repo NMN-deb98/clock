@@ -197,7 +197,7 @@ class StopwatchActivity : AppCompatActivity() {
             setTextColor(textColor)
             background = rounded(backgroundColor, dp(24), getColor(R.color.surface_border))
             isAllCaps = false
-            minHeight = dp(52); isStateListAnimatorEnabled = true
+            minHeight = dp(52)
         }
 
     private fun label(value: String, size: Float, color: Int, bold: Boolean = false) =
