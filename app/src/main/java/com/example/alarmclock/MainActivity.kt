@@ -16,6 +16,7 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.alarmclock.databinding.ActivityMainBinding
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
@@ -27,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     private val countdownTick = object : Runnable {
         override fun run() {
             updateNextAlarm()
-            countdownHandler.postDelayed(this, 30_000)
+            countdownHandler.postDelayed(this, 1_000)
         }
     }
     private val notificationPermissionLauncher =
@@ -77,15 +78,29 @@ class MainActivity : AppCompatActivity() {
             binding.textNextAlarmTime.text = "برای شروع، یک هشدار جدید اضافه کن."
             return
         }
+
         val remaining = (next.second - System.currentTimeMillis()).coerceAtLeast(0L)
-        val hours = TimeUnit.MILLISECONDS.toHours(remaining)
+        val days = TimeUnit.MILLISECONDS.toDays(remaining)
+        val hours = TimeUnit.MILLISECONDS.toHours(remaining) % 24
         val minutes = TimeUnit.MILLISECONDS.toMinutes(remaining) % 60
-        binding.textNextAlarmCountdown.text = "تا زنگ بعدی: $hours ساعت و $minutes دقیقه"
-        val clock = String.format(java.util.Locale("fa", "IR"), "%02d:%02d", next.first.hour, next.first.minute)
+        val seconds = TimeUnit.MILLISECONDS.toSeconds(remaining) % 60
+        val parts = mutableListOf<String>()
+        if (days > 0) parts.add("${persianNumber(days)} روز")
+        if (hours > 0 || days > 0) parts.add("${persianNumber(hours)} ساعت")
+        if (minutes > 0 || hours > 0 || days > 0) parts.add("${persianNumber(minutes)} دقیقه")
+        parts.add("${persianNumber(seconds)} ثانیه")
+        binding.textNextAlarmCountdown.text = "تا زنگ بعدی: " + parts.joinToString(" و ")
+
+        val clock = String.format(Locale("fa", "IR"), "%02d:%02d", next.first.hour, next.first.minute)
         binding.textNextAlarmTime.text = "${next.first.label.ifBlank { "هشدار بعدی" }} • ساعت $clock"
     }
 
-    override fun onResume() { super.onResume(); countdownHandler.post(countdownTick) }
+    private fun persianNumber(number: Long): String =
+        number.toString().map { ch ->
+            if (ch in '0'..'9') ('۰'.code + (ch - '0')).toChar() else ch
+        }.joinToString("")
+
+    override fun onResume() { super.onResume(); countdownHandler.removeCallbacks(countdownTick); countdownHandler.post(countdownTick) }
     override fun onPause() { countdownHandler.removeCallbacks(countdownTick); super.onPause() }
 
     private fun askNotificationPermissionIfNeeded() {
