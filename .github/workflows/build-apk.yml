@@ -14,26 +14,21 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
         with:
           packages: 'platform-tools platforms;android-34 build-tools;34.0.0'
-
       - name: Set up Gradle 8.2.1
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.2.1'
-
       - name: Run Android lint and unit tests
         run: gradle --no-daemon lintDebug testDebugUnitTest
-
       - name: Upload lint report
         if: always()
         uses: actions/upload-artifact@v4
@@ -42,10 +37,8 @@ jobs:
           path: app/build/reports/lint-results-debug.html
           if-no-files-found: ignore
           retention-days: 7
-
       - name: Build debug APK
         run: gradle --no-daemon assembleDebug
-
       - name: Upload raw build output
         uses: actions/upload-artifact@v4
         with:
@@ -53,10 +46,8 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
-
       - name: Prepare Hooshyar APK for download
         run: cp app/build/outputs/apk/debug/app-debug.apk "Hooshyar-v1.0.${{ github.run_number }}.apk"
-
       - name: Upload named Hooshyar APK
         uses: actions/upload-artifact@v4
         with:
@@ -64,9 +55,33 @@ jobs:
           path: Hooshyar-v1.0.${{ github.run_number }}.apk
           if-no-files-found: error
           retention-days: 30
+      - name: Update Hooshyar v1.0.62 release notes
+        if: github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'docs(release): document Hooshyar changes')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release edit v1.0.62 --repo "${{ github.repository }}" --title "Hooshyar v1.0.62" --notes-file - <<'NOTES'
+          ## تغییرات نسخه هوشیار (Hooshyar) — v1.0.62
 
+          ### تغییرات اصلی
+          - **نام برنامه:** نام فارسی برنامه «هوشیار» و نام انگلیسی آن **Hooshyar** یکدست‌سازی شد.
+          - **نمایش عبارت‌های ریاضی فارسی:** عبارت‌های ریاضی به ترتیب چپ‌به‌راست نمایش داده می‌شوند تا عملیاتی مانند ۱۰ − ۵ به‌درستی خوانده و تفسیر شوند.
+          - **هشدار روی صفحه قفل:** مسیر نمایش تمام‌صفحه هشدار و مدیریت اعلان هشدار به‌روزرسانی شد.
+          - **تعویق هشدار (Snooze):** مسیر تعویق و بازگشت به صفحه هشدار اصلاح شد.
+          - **رفتار پس از زنگ خوردن:** منطق حذف/مدیریت هشدار پس از زنگ خوردن تنظیم شد.
+          - **تایمر و کرنومتر:** اصلاحات کد Kotlin برای رفع مشکلات ساخت و بهبود سازگاری اعمال شد.
+
+          ### بررسی ساخت
+          - بررسی‌های Android lint و تست‌های واحد با موفقیت اجرا شدند.
+          - فایل APK از سورس شاخه main در همین اجرای موفق GitHub Actions ساخته شده است.
+
+          ### دانلود
+          فایل Hooshyar-v1.0.62.apk را از بخش Assets همین صفحه دریافت کنید.
+
+          > توجه: موفقیت ساخت و تست‌های خودکار به معنی آزمایش کامل روی همه مدل‌های گوشی نیست. عملکرد آلارم، صفحه قفل و نمایش ریاضی را پس از نصب روی دستگاه خود نیز بررسی کنید.
+          NOTES
       - name: Publish Hooshyar APK to GitHub Release
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'docs(release): document Hooshyar changes')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -74,4 +89,13 @@ jobs:
           gh release create "$TAG" "Hooshyar-v1.0.${{ github.run_number }}.apk" \
             --repo "${{ github.repository }}" \
             --title "Hooshyar $TAG" \
-            --notes "نسخهٔ هوشیار (Hooshyar). فایل APK از سورس همین اجرای موفق ساخته شده است."
+            --notes "## تغییرات نسخه هوشیار (Hooshyar)
+
+          - یکدست‌سازی نام برنامه به «هوشیار» و Hooshyar
+          - اصلاح جهت نمایش عبارت‌های ریاضی برای خوانش درست در رابط فارسی
+          - به‌روزرسانی مسیر نمایش هشدار تمام‌صفحه روی صفحه قفل و اعلان هشدار
+          - اصلاح مسیر تعویق هشدار و منطق مدیریت هشدار پس از زنگ خوردن
+          - اصلاحات کد تایمر و کرنومتر
+          - بررسی‌های Android lint و تست‌های واحد با موفقیت اجرا شدند
+
+          **توجه:** ساخت و تست خودکار موفق بوده؛ رفتار روی همه دستگاه‌ها به‌صورت فیزیکی تأیید نشده است."
