@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">ساعت هشدار حرفه‌ای</string>
+    <string name="app_name">هوشیار</string>
     <string name="new_alarm">هشدار جدید</string>
     <string name="edit_alarm">ویرایش هشدار</string>
     <string name="no_alarms_yet">هنوز هشداری تنظیم نشده است</string>
