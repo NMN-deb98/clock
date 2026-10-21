@@ -24,7 +24,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".AlarmEditActivity" android:exported="false" android:label="@string/edit_alarm" />
-        <activity android:name=".AlarmRingActivity" android:exported="false" android:showWhenLocked="true" android:turnScreenOn="true" android:excludeFromRecents="true" />
+        <activity android:name=".AlarmRingActivity" android:exported="false" android:showWhenLocked="true" android:turnScreenOn="true" android:excludeFromRecents="true" android:launchMode="singleTop" />
         <activity android:name=".WorldClockActivity" android:exported="false" />
         <activity android:name=".StopwatchActivity" android:exported="false" />
         <activity android:name=".CountdownTimerActivity" android:exported="false" />
