@@ -1,6 +1,7 @@
 package com.example.alarmclock
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.graphics.Bitmap
 import android.media.Ringtone
 import android.media.RingtoneManager
@@ -69,8 +70,7 @@ class AlarmRingActivity : AppCompatActivity() {
         deleteAfterRinging = intent.getBooleanExtra("delete_after_ringing", false)
         binding.textNote.text = label.ifBlank { getString(R.string.no_note) }
 
-        startRinging(ringtoneUriString)
-        if (shouldVibrate) startVibrating()
+        // AlarmRingingService owns playback so sound survives if this Activity cannot open over lock screen.
 
         if (wakeMode == "MATH") {
             mathQuestions = createQuestions(mathDifficulty)
@@ -285,6 +285,7 @@ class AlarmRingActivity : AppCompatActivity() {
     }
 
     private fun stopAndFinish() {
+        stopAlarmService()
         ringtone?.stop()
         vibrator?.cancel()
         NotificationHelper.cancelNotification(this, alarmId)
@@ -300,6 +301,7 @@ class AlarmRingActivity : AppCompatActivity() {
     }
 
     private fun snoozeAndFinish() {
+        stopAlarmService()
         ringtone?.stop()
         vibrator?.cancel()
         NotificationHelper.cancelNotification(this, alarmId)
@@ -319,6 +321,11 @@ class AlarmRingActivity : AppCompatActivity() {
     override fun onBackPressed() {
         if (wakeMode == "NONE") stopAndFinish()
         else android.widget.Toast.makeText(this, "برای خاموش کردن هشدار، چالش را کامل کن.", android.widget.Toast.LENGTH_SHORT).show()
+    }
+
+    private fun stopAlarmService() {
+        val stopIntent = Intent(this, AlarmRingingService::class.java).apply { action = AlarmRingingService.ACTION_STOP }
+        startService(stopIntent)
     }
 
     override fun onDestroy() {

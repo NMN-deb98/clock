@@ -3,6 +3,7 @@ package com.example.alarmclock
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -10,25 +11,27 @@ import kotlinx.coroutines.launch
 class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val alarmId = intent.getIntExtra("alarm_id", -1)
-        if (alarmId == -1) return
-        val pendingResult = goAsync()
+        if (alarmId < 0) return
+        val result = goAsync()
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                val dao = AlarmDatabase.getInstance(context).alarmDao()
-                val alarm = dao.getById(alarmId)
+                val alarm = AlarmDatabase.getInstance(context).alarmDao().getById(alarmId)
                 if (alarm != null && alarm.enabled) {
-                    NotificationHelper.showAlarmNotification(context, alarm)
-                    // NotificationHelper attaches a full-screen intent. Android can then
-                    // show the alarm over the lock screen when the user has allowed it.
-                    if (!alarm.deleteAfterRinging) {
-                        // اگر قرار نیست حذف شود، زمان بعدی را از همین حالا تنظیم کن.
-                        // هشدار تکرارشونده طبق روزهای انتخاب‌شده؛ یک‌باره در روز بعد تکرار می‌شود.
-                        AlarmScheduler.schedule(context, alarm)
+                    val serviceIntent = Intent(context, AlarmRingingService::class.java).apply {
+                        putExtra("alarm_id", alarm.id)
+                        putExtra("label", alarm.label)
+                        putExtra("ringtone_uri", alarm.ringtoneUri)
+                        putExtra("vibrate", alarm.vibrate)
+                        putExtra("wake_mode", alarm.wakeMode)
+                        putExtra("math_difficulty", alarm.mathDifficulty)
+                        putExtra("delete_after_ringing", alarm.deleteAfterRinging)
                     }
-                    // حذف اختیاری بعد از خاموش‌کردن کاربر، داخل AlarmRingActivity انجام می‌شود.
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) context.startForegroundService(serviceIntent)
+                    else context.startService(serviceIntent)
+                    if (!alarm.deleteAfterRinging) AlarmScheduler.schedule(context, alarm)
                 }
             } finally {
-                pendingResult.finish()
+                result.finish()
             }
         }
     }

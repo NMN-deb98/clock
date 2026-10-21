@@ -97,8 +97,8 @@ class CountdownTimerActivity : AppCompatActivity() {
             for (minutes in chunk) {
                 val chip = Button(this).apply {
                     text = toPersian(minutes.toString()) + " دقیقه"; textSize = 12f; isAllCaps = false
-                    setTextColor(primary); backgroundTintList = ColorStateList.valueOf(elevated)
-                    ; minHeight = dp(42)
+                    setTextColor(primary); background = rounded(elevated, dp(18), border)
+                    minHeight = dp(42)
                     setOnClickListener { choosePreset(minutes) }
                 }
                 row.addView(chip, LinearLayout.LayoutParams(0, dp(42), 1f).apply {
@@ -155,7 +155,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         root.addView(controls)
         root.addView(Button(this).apply {
             text = "بازگشت"; isAllCaps = false; setTextColor(secondary)
-            backgroundTintList = ColorStateList.valueOf(bg); setOnClickListener { finish() }
+            background = rounded(bg, dp(22), border); setOnClickListener { finish() }
         }, LinearLayout.LayoutParams(-1, dp(44)).apply { topMargin = dp(4) })
         setContentView(ScrollView(this).apply { isFillViewport = true; addView(root) })
         syncFromPickers()
@@ -181,7 +181,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         }
         if (completed) { remainingMs = totalDurationMs; completed = false }
         if (remainingMs <= 0L) {
-            remainingMs = (minutesPicker.value * 60L + secondsPicker.value) * 1000L
+            remainingMs = (hoursPicker.value * 3600L + minutesPicker.value * 60L + secondsPicker.value) * 1000L
             totalDurationMs = remainingMs
         }
         if (remainingMs <= 0L) {
@@ -208,7 +208,7 @@ class CountdownTimerActivity : AppCompatActivity() {
 
     private fun resetTimer() {
         timer?.cancel(); timer = null; running = false; completed = false
-        remainingMs = (minutesPicker.value * 60L + secondsPicker.value) * 1000L
+        remainingMs = (hoursPicker.value * 3600L + minutesPicker.value * 60L + secondsPicker.value) * 1000L
         totalDurationMs = remainingMs
         updateDisplay(); updateControls()
     }
@@ -242,15 +242,15 @@ class CountdownTimerActivity : AppCompatActivity() {
             remainingMs < totalDurationMs && remainingMs > 0L -> "ادامه"
             else -> "شروع تایمر"
         }
-        startButton.backgroundTintList = ColorStateList.valueOf(if (running) violet else cyan)
+        startButton.background = rounded(if (running) violet else cyan, dp(24), border)
         startButton.setTextColor(bg)
         hoursPicker.isEnabled = !running; minutesPicker.isEnabled = !running; secondsPicker.isEnabled = !running
     }
 
     private fun actionButton(label: String, color: Int, textColor: Int) = Button(this).apply {
         text = label; textSize = 14f; typeface = Typeface.DEFAULT_BOLD; isAllCaps = false
-        setTextColor(textColor); backgroundTintList = ColorStateList.valueOf(color)
-        minHeight = dp(52); 
+        setTextColor(textColor); background = rounded(color, dp(24), border)
+        minHeight = dp(52) 
     }
 
     private fun text(value: String, size: Float, color: Int, bold: Boolean = false) = TextView(this).apply {

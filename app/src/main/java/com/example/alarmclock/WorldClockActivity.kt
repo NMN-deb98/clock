@@ -1,5 +1,6 @@
 package com.example.alarmclock
 
+import android.icu.util.TimeZone as IcuTimeZone
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -8,117 +9,143 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.Spinner
-import android.widget.EditText
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import java.util.TimeZone
 
 class WorldClockActivity : AppCompatActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private lateinit var list: LinearLayout
-    private lateinit var spinner: Spinner
+    private lateinit var countrySpinner: Spinner
+    private lateinit var citySpinner: Spinner
     private lateinit var searchInput: EditText
-    private lateinit var zoneAdapter: ArrayAdapter<String>
-    private var filteredZones: List<ZoneChoice> = emptyList()
+    private lateinit var countryAdapter: ArrayAdapter<String>
+    private lateinit var cityAdapter: ArrayAdapter<String>
+    private var filteredCountries: List<CountryChoice> = emptyList()
+    private var citiesForCountry: List<ZoneChoice> = emptyList()
     private val prefs by lazy { getSharedPreferences("world_clocks", MODE_PRIVATE) }
 
-    // Use the device's complete IANA time-zone database rather than a short hard-coded list.
+    private data class ZoneChoice(val id: String, val city: String, val countryCode: String)
+    private data class CountryChoice(val code: String, val faName: String, val enName: String, val flag: String)
+    private data class ClockRow(val time: TextView, val dayStatus: TextView)
+
     private val allZones: List<ZoneChoice> by lazy {
-        TimeZone.getAvailableIDs()
+        java.util.TimeZone.getAvailableIDs().asSequence()
             .filter { it.contains('/') && !it.startsWith("Etc/") && !it.startsWith("SystemV/") }
             .distinct()
-            .map { id -> ZoneChoice(id, displayName(id)) }
-            .sortedBy { it.label.lowercase(Locale.ROOT) }
+            .map { id ->
+                val parts = id.split('/')
+                ZoneChoice(id, parts.last().replace('_', ' ').replace('-', ' '), runCatching { IcuTimeZone.getRegion(id) }.getOrDefault("001"))
+            }
+            .filter { it.countryCode.matches(Regex("[A-Z]{2}")) && it.countryCode != "ZZ" }
+            .toList()
+    }
+
+    private val allCountries: List<CountryChoice> by lazy {
+        allZones.map { it.countryCode }.distinct().mapNotNull { code ->
+            val locale = Locale("", code)
+            val en = locale.getDisplayCountry(Locale.ENGLISH).takeIf { it.isNotBlank() && it != code } ?: return@mapNotNull null
+            val fa = locale.getDisplayCountry(Locale("fa")).takeIf { it.isNotBlank() && it != code } ?: en
+            CountryChoice(code, fa, en, flagFor(code))
+        }.sortedBy { it.faName.lowercase(Locale("fa")) }
     }
     private val selected = linkedSetOf<String>()
     private val rows = linkedMapOf<String, ClockRow>()
-    private data class ZoneChoice(val id: String, val label: String)
-    private data class ClockRow(val time: TextView, val dayStatus: TextView)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         selected.addAll(prefs.getStringSet("zones", setOf("Asia/Tehran", "Europe/London", "America/New_York")) ?: emptySet())
-        selected.retainAll(allZones.map { it.id }.toSet())
+        val validZones = allZones.map { it.id }.toSet()
+        selected.retainAll(validZones)
 
         val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
-            setPadding(24, 24, 24, 18)
+            setPadding(20, 20, 20, 14)
             layoutDirection = View.LAYOUT_DIRECTION_RTL
             setBackgroundColor(getColor(R.color.app_background))
         }
         root.addView(TextView(this).apply {
-            text = "ساعت جهانی"
-            textSize = 27f
-            setTextColor(getColor(R.color.text_primary))
-            setPadding(0, 0, 0, 6)
-            gravity = Gravity.END
+            text = "ساعت جهانی"; textSize = 27f; setTextColor(getColor(R.color.text_primary))
+            gravity = Gravity.END; setPadding(0, 0, 0, 5)
         })
         root.addView(TextView(this).apply {
-            text = "زمان محلی شهرهای مختلف را زنده ببین"
-            textSize = 13f
-            setTextColor(getColor(R.color.text_secondary))
-            setPadding(0, 0, 0, 16)
-            gravity = Gravity.END
+            text = "کشور را پیدا کن و سپس شهر دلخواهت را اضافه کن"
+            textSize = 13f; setTextColor(getColor(R.color.text_secondary))
+            gravity = Gravity.END; setPadding(0, 0, 0, 14)
         })
 
         searchInput = EditText(this).apply {
-            hint = "جست‌وجوی شهر یا کشور…"
-            textSize = 14f
-            setSingleLine(true)
-            layoutDirection = View.LAYOUT_DIRECTION_RTL
-            background = getDrawable(R.drawable.bg_input_field)
-            setPadding(16, 10, 16, 10)
-            setTextColor(getColor(R.color.text_primary))
-            setHintTextColor(getColor(R.color.text_secondary))
+            hint = "جست‌وجوی کشور به فارسی یا انگلیسی…"
+            textSize = 14f; setSingleLine(true); layoutDirection = View.LAYOUT_DIRECTION_RTL
+            background = getDrawable(R.drawable.bg_input_field); setPadding(14, 9, 14, 9)
+            setTextColor(getColor(R.color.text_primary)); setHintTextColor(getColor(R.color.text_secondary))
         }
         root.addView(searchInput, ViewGroup.LayoutParams(-1, -2))
 
-        spinner = Spinner(this).apply {
-            background = getDrawable(R.drawable.bg_input_field)
-            setPadding(12, 4, 12, 4)
+        countrySpinner = Spinner(this).apply { background = getDrawable(R.drawable.bg_input_field); setPadding(10, 4, 10, 4) }
+        filteredCountries = allCountries
+        countryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, filteredCountries.map { "${it.flag}  ${it.faName}  ·  ${it.enName}" })
+        countrySpinner.adapter = countryAdapter
+        root.addView(countrySpinner, ViewGroup.LayoutParams(-1, -2))
+
+        citySpinner = Spinner(this).apply { background = getDrawable(R.drawable.bg_input_field); setPadding(10, 4, 10, 4) }
+        cityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, emptyList<String>())
+        citySpinner.adapter = cityAdapter
+        root.addView(citySpinner, ViewGroup.LayoutParams(-1, -2))
+
+        countrySpinner.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) { citiesForCountry = emptyList(); refreshCities() }
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val country = filteredCountries.getOrNull(position)
+                citiesForCountry = country?.let { c -> allZones.filter { it.countryCode == c.code }.sortedBy { it.city.lowercase(Locale.ROOT) } }.orEmpty()
+                refreshCities()
+            }
         }
-        filteredZones = allZones
-        zoneAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, filteredZones.map { it.label })
-        spinner.adapter = zoneAdapter
-        root.addView(spinner, ViewGroup.LayoutParams(-1, -2))
         searchInput.addTextChangedListener(object : android.text.TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val query = s?.toString()?.trim().orEmpty()
-                filteredZones = if (query.isEmpty()) allZones else allZones.filter { choice ->
-                    choice.label.contains(query, ignoreCase = true) ||
-                    choice.id.contains(query, ignoreCase = true) ||
-                    countryForZone(choice.id)?.first?.contains(query, ignoreCase = true) == true ||
-                    localizedSearchTerms(choice.id).any { it.contains(query, ignoreCase = true) }
+                val query = normalize(s?.toString().orEmpty())
+                val previousCode = filteredCountries.getOrNull(countrySpinner.selectedItemPosition)?.code
+                filteredCountries = if (query.isBlank()) allCountries else allCountries.filter {
+                    normalize(it.faName).contains(query) || normalize(it.enName).contains(query) || normalize(it.code).contains(query)
                 }
-                zoneAdapter.clear()
-                zoneAdapter.addAll(filteredZones.map { it.label })
-                zoneAdapter.notifyDataSetChanged()
-                if (filteredZones.isEmpty()) {
-                    Toast.makeText(this@WorldClockActivity, "شهر یا کشور موردنظر پیدا نشد.", Toast.LENGTH_SHORT).show()
+                countryAdapter.clear()
+                countryAdapter.addAll(filteredCountries.map { "${it.flag}  ${it.faName}  ·  ${it.enName}" })
+                countryAdapter.notifyDataSetChanged()
+                if (filteredCountries.isEmpty()) {
+                    citiesForCountry = emptyList()
+                    refreshCities()
+                    Toast.makeText(this@WorldClockActivity, "کشوری با این نام پیدا نشد.", Toast.LENGTH_SHORT).show()
+                } else {
+                    val preserved = filteredCountries.indexOfFirst { it.code == previousCode }.takeIf { it >= 0 } ?: 0
+                    countrySpinner.setSelection(preserved)
+                    val country = filteredCountries[preserved]
+                    citiesForCountry = allZones.filter { it.countryCode == country.code }.sortedBy { it.city.lowercase(Locale.ROOT) }
+                    refreshCities()
                 }
             }
             override fun afterTextChanged(s: android.text.Editable?) = Unit
         })
+
         root.addView(Button(this).apply {
-            text = "＋ افزودن شهر"
+            text = "＋ افزودن شهر"; isAllCaps = false
             backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.accent_cyan))
             setTextColor(getColor(R.color.app_background))
             setOnClickListener {
-                val choice = filteredZones.getOrNull(spinner.selectedItemPosition) ?: return@setOnClickListener
-                if (!selected.add(choice.id)) {
-                    Toast.makeText(this@WorldClockActivity, "این شهر قبلاً اضافه شده است.", Toast.LENGTH_SHORT).show()
+                val choice = citiesForCountry.getOrNull(citySpinner.selectedItemPosition)
+                if (choice == null) {
+                    Toast.makeText(this@WorldClockActivity, "ابتدا یک کشور و شهر انتخاب کن.", Toast.LENGTH_SHORT).show()
                     return@setOnClickListener
                 }
-                persist()
-                render()
+                if (!selected.add(choice.id)) Toast.makeText(this@WorldClockActivity, "این شهر قبلاً اضافه شده است.", Toast.LENGTH_SHORT).show()
+                else { persist(); render() }
             }
         })
 
@@ -127,167 +154,85 @@ class WorldClockActivity : AppCompatActivity() {
         scroll.addView(list)
         root.addView(scroll, LinearLayout.LayoutParams(-1, 0, 1f))
         root.addView(Button(this).apply {
-            text = "بازگشت"
+            text = "بازگشت"; isAllCaps = false
             backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.surface_elevated))
-            setTextColor(getColor(R.color.text_primary))
-            setOnClickListener { finish() }
+            setTextColor(getColor(R.color.text_primary)); setOnClickListener { finish() }
         })
         setContentView(root)
+        if (filteredCountries.isNotEmpty()) {
+            val country = filteredCountries.first()
+            citiesForCountry = allZones.filter { it.countryCode == country.code }.sortedBy { it.city.lowercase(Locale.ROOT) }
+            refreshCities()
+        }
         render()
     }
 
+    private fun refreshCities() {
+        cityAdapter.clear()
+        cityAdapter.addAll(citiesForCountry.map { it.cityLabel() })
+        cityAdapter.notifyDataSetChanged()
+    }
+
+    private fun ZoneChoice.cityLabel(): String = city
+
+    private fun flagFor(code: String): String {
+        if (code.length != 2) return ""
+        return code.uppercase(Locale.ROOT).map { char -> String(Character.toChars(0x1F1E6 + char.code - 'A'.code)) }.joinToString("")
+    }
+
+    private fun normalize(value: String): String = value.lowercase(Locale.ROOT).trim()
+        .replace('ي', 'ی').replace('ك', 'ک').replace(Regex("\\s+"), " ")
+
+    private fun countryForZone(id: String): CountryChoice? {
+        val code = allZones.firstOrNull { it.id == id }?.countryCode ?: return null
+        return allCountries.firstOrNull { it.code == code }
+    }
+
     private fun displayName(id: String): String {
-        val parts = id.split('/')
-        val city = parts.last().replace('_', ' ').replace('-', ' ')
-        val region = parts.first().replace('_', ' ')
-        // Avoid presenting a continent as if it were the country.
+        val zone = allZones.firstOrNull { it.id == id } ?: return id
         val country = countryForZone(id)
-        val known = mapOf(
-            "Asia/Tehran" to "تهران · ایران 🇮🇷",
-            "Europe/Istanbul" to "استانبول · ترکیه 🇹🇷",
-            "Europe/London" to "لندن · بریتانیا 🇬🇧",
-            "Europe/Paris" to "پاریس · فرانسه 🇫🇷",
-            "America/New_York" to "نیویورک · آمریکا 🇺🇸",
-            "America/Los_Angeles" to "لس‌آنجلس · آمریکا 🇺🇸",
-            "America/Chicago" to "شیکاگو · آمریکا 🇺🇸",
-            "America/Toronto" to "تورنتو · کانادا 🇨🇦",
-            "America/Vancouver" to "ونکوور · کانادا 🇨🇦",
-            "Asia/Dubai" to "دبی · امارات 🇦🇪",
-            "Asia/Tokyo" to "توکیو · ژاپن 🇯🇵",
-            "Asia/Seoul" to "سئول · کره جنوبی 🇰🇷",
-            "Asia/Kolkata" to "دهلی · هند 🇮🇳",
-            "Australia/Sydney" to "سیدنی · استرالیا 🇦🇺",
-            "Asia/Singapore" to "سنگاپور 🇸🇬",
-            "Europe/Moscow" to "مسکو · روسیه 🇷🇺",
-            "Asia/Riyadh" to "ریاض · عربستان 🇸🇦",
-            "Asia/Kabul" to "کابل · افغانستان 🇦🇫",
-            "Asia/Shanghai" to "شانگهای · چین 🇨🇳",
-            "Asia/Hong_Kong" to "هنگ‌کنگ 🇭🇰",
-            "Asia/Bangkok" to "بانکوک · تایلند 🇹🇭",
-            "Asia/Jakarta" to "جاکارتا · اندونزی 🇮🇩",
-            "Europe/Berlin" to "برلین · آلمان 🇩🇪",
-            "Europe/Rome" to "رم · ایتالیا 🇮🇹",
-            "Europe/Madrid" to "مادرید · اسپانیا 🇪🇸",
-            "Europe/Amsterdam" to "آمستردام · هلند 🇳🇱",
-            "America/Sao_Paulo" to "سائوپائولو · برزیل 🇧🇷",
-            "Africa/Cairo" to "قاهره · مصر 🇪🇬",
-            "Africa/Johannesburg" to "ژوهانسبورگ · آفریقای جنوبی 🇿🇦",
-            "Pacific/Auckland" to "اوکلند · نیوزیلند 🇳🇿"
-        )
-        return known[id] ?: if (country != null) "$city · ${country.first} ${country.second}" else "$city · منطقهٔ زمانی $region"
+        return if (country == null) zone.city else "${zone.city} · ${country.faName} ${country.flag}"
     }
 
-    private fun localizedSearchTerms(id: String): List<String> {
-        val terms = mapOf(
-            "Asia/Tehran" to listOf("تهران", "ایران", "tehran", "iran"),
-            "Europe/Istanbul" to listOf("استانبول", "ترکیه", "istanbul", "turkey", "türkiye"),
-            "Europe/London" to listOf("لندن", "بریتانیا", "انگلستان", "london", "uk", "england"),
-            "Europe/Paris" to listOf("پاریس", "فرانسه", "paris", "france"),
-            "America/New_York" to listOf("نیویورک", "آمریکا", "new york", "usa", "united states"),
-            "America/Los_Angeles" to listOf("لس آنجلس", "los angeles", "usa"),
-            "Asia/Tokyo" to listOf("توکیو", "ژاپن", "tokyo", "japan"),
-            "Asia/Dubai" to listOf("دبی", "امارات", "dubai", "uae", "united arab emirates"),
-            "Asia/Kolkata" to listOf("دهلی", "هند", "delhi", "india"),
-            "Europe/Berlin" to listOf("برلین", "آلمان", "berlin", "germany"),
-            "Europe/Rome" to listOf("رم", "ایتالیا", "rome", "italy"),
-            "Europe/Moscow" to listOf("مسکو", "روسیه", "moscow", "russia"),
-            "Asia/Shanghai" to listOf("شانگهای", "چین", "shanghai", "china")
-        )
-        return terms[id].orEmpty()
-    }
-
-    private fun countryForZone(id: String): Pair<String, String>? {
-        val countryByZone = mapOf(
-            "Asia/Tehran" to ("ایران" to "🇮🇷"), "Europe/Istanbul" to ("ترکیه" to "🇹🇷"),
-            "Europe/London" to ("بریتانیا" to "🇬🇧"), "Europe/Paris" to ("فرانسه" to "🇫🇷"),
-            "Europe/Berlin" to ("آلمان" to "🇩🇪"), "Europe/Rome" to ("ایتالیا" to "🇮🇹"),
-            "Europe/Madrid" to ("اسپانیا" to "🇪🇸"), "Europe/Amsterdam" to ("هلند" to "🇳🇱"),
-            "Europe/Moscow" to ("روسیه" to "🇷🇺"), "America/New_York" to ("آمریکا" to "🇺🇸"),
-            "America/Los_Angeles" to ("آمریکا" to "🇺🇸"), "America/Chicago" to ("آمریکا" to "🇺🇸"),
-            "America/Toronto" to ("کانادا" to "🇨🇦"), "America/Vancouver" to ("کانادا" to "🇨🇦"),
-            "Asia/Dubai" to ("امارات" to "🇦🇪"), "Asia/Tokyo" to ("ژاپن" to "🇯🇵"),
-            "Asia/Seoul" to ("کره جنوبی" to "🇰🇷"), "Asia/Kolkata" to ("هند" to "🇮🇳"),
-            "Australia/Sydney" to ("استرالیا" to "🇦🇺"), "Asia/Singapore" to ("سنگاپور" to "🇸🇬"),
-            "Asia/Riyadh" to ("عربستان سعودی" to "🇸🇦"), "Asia/Kabul" to ("افغانستان" to "🇦🇫"),
-            "Asia/Shanghai" to ("چین" to "🇨🇳"), "Asia/Hong_Kong" to ("هنگ‌کنگ" to "🇭🇰"),
-            "Asia/Bangkok" to ("تایلند" to "🇹🇭"), "Asia/Jakarta" to ("اندونزی" to "🇮🇩"),
-            "America/Sao_Paulo" to ("برزیل" to "🇧🇷"), "Africa/Cairo" to ("مصر" to "🇪🇬"),
-            "Africa/Johannesburg" to ("آفریقای جنوبی" to "🇿🇦"), "Pacific/Auckland" to ("نیوزیلند" to "🇳🇿")
-        )
-        countryByZone[id]?.let { return it }
-        val prefixes = listOf("America/" to ("آمریکا" to "🇺🇸"), "Australia/" to ("استرالیا" to "🇦🇺"))
-        return prefixes.firstOrNull { id.startsWith(it.first) }?.second
-    }
-
-    private fun persist() {
-        prefs.edit().putStringSet("zones", selected.toSet()).apply()
-    }
+    private fun persist() { prefs.edit().putStringSet("zones", selected.toSet()).apply() }
 
     private fun render() {
         list.removeAllViews()
         rows.clear()
-        if (selected.isEmpty()) {
-            list.addView(TextView(this).apply {
-                text = "هنوز شهری اضافه نکرده‌ای. از فهرست بالا یک شهر انتخاب کن."
-                textSize = 14f
-                setTextColor(getColor(R.color.text_secondary))
-                gravity = Gravity.CENTER
-                setPadding(16, 32, 16, 32)
-            })
-        }
+        if (selected.isEmpty()) list.addView(TextView(this).apply {
+            text = "هنوز شهری اضافه نکرده‌ای. از فهرست بالا یک کشور و شهر انتخاب کن."
+            textSize = 14f; setTextColor(getColor(R.color.text_secondary)); gravity = Gravity.CENTER
+            setPadding(16, 32, 16, 32)
+        })
         selected.forEach { id ->
-            val choice = allZones.firstOrNull { it.id == id } ?: return@forEach
+            val zone = allZones.firstOrNull { it.id == id } ?: return@forEach
             val row = LinearLayout(this).apply {
-                orientation = LinearLayout.HORIZONTAL
-                gravity = Gravity.CENTER_VERTICAL
-                layoutDirection = View.LAYOUT_DIRECTION_RTL
-                setPadding(14, 16, 14, 16)
-                background = getDrawable(R.drawable.bg_surface_card)
-                elevation = 2f
+                orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
+                layoutDirection = View.LAYOUT_DIRECTION_RTL; setPadding(14, 14, 14, 14)
+                background = getDrawable(R.drawable.bg_surface_card); elevation = 2f
             }
             val column = LinearLayout(this).apply {
-                orientation = LinearLayout.VERTICAL
-                gravity = Gravity.CENTER_VERTICAL
+                orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER_VERTICAL
                 layoutParams = LinearLayout.LayoutParams(0, -2, 1f)
             }
             column.addView(TextView(this).apply {
-                text = choice.label
-                textSize = 15f
-                setTextColor(getColor(R.color.text_primary))
-                gravity = Gravity.END
+                text = displayName(id); textSize = 15f; setTextColor(getColor(R.color.text_primary)); gravity = Gravity.END
             })
             val time = TextView(this).apply {
-                textSize = 27f
-                setTextColor(getColor(R.color.accent_cyan))
-                gravity = Gravity.END
-                typeface = android.graphics.Typeface.MONOSPACE
-                includeFontPadding = false
-                setPadding(0, 6, 0, 4)
+                textSize = 27f; setTextColor(getColor(R.color.accent_cyan)); gravity = Gravity.END
+                typeface = android.graphics.Typeface.MONOSPACE; includeFontPadding = false; setPadding(0, 6, 0, 4)
             }
             column.addView(time)
-            val status = TextView(this).apply {
-                textSize = 12f
-                setTextColor(getColor(R.color.text_secondary))
-                gravity = Gravity.END
-            }
+            val status = TextView(this).apply { textSize = 12f; setTextColor(getColor(R.color.text_secondary)); gravity = Gravity.END }
             column.addView(status)
             row.addView(column)
             row.addView(Button(this).apply {
-                text = "حذف"
-                minWidth = 0
+                text = "حذف"; isAllCaps = false; minWidth = 0
                 backgroundTintList = android.content.res.ColorStateList.valueOf(getColor(R.color.danger))
                 setTextColor(getColor(R.color.app_background))
-                setOnClickListener {
-                    selected.remove(id)
-                    persist()
-                    render()
-                }
-            }, LinearLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                marginStart = 10
-            })
-            list.addView(row, LinearLayout.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT).apply {
-                bottomMargin = 10
-            })
+                setOnClickListener { selected.remove(id); persist(); render() }
+            }, LinearLayout.LayoutParams(-2, -2).apply { marginStart = 10 })
+            list.addView(row, LinearLayout.LayoutParams(-1, -2).apply { bottomMargin = 10 })
             rows[id] = ClockRow(time, status)
         }
         updateTimes()
@@ -295,25 +240,20 @@ class WorldClockActivity : AppCompatActivity() {
 
     private fun updateTimes() {
         val now = Date()
-        val timeFormatter = SimpleDateFormat("HH:mm:ss", Locale("fa", "IR"))
-        val dateFormatter = SimpleDateFormat("EEEE، dd MMMM yyyy", Locale("fa", "IR"))
+        val timeFormat = SimpleDateFormat("HH:mm:ss", Locale("fa", "IR"))
+        val dateFormat = SimpleDateFormat("EEEE، dd MMMM yyyy", Locale("fa", "IR"))
         rows.forEach { (zone, row) ->
-            val timeZone = TimeZone.getTimeZone(zone)
-            timeFormatter.timeZone = timeZone
-            dateFormatter.timeZone = timeZone
-            row.time.text = timeFormatter.format(now)
-            val hour = SimpleDateFormat("H", Locale.ROOT).apply { this.timeZone = timeZone }.format(now).toIntOrNull() ?: 12
-            val isDay = hour in 6..17
-            row.dayStatus.text = (if (isDay) "☀️ روز" else "🌙 شب") + "  •  " + dateFormatter.format(now)
-            row.dayStatus.setTextColor(getColor(if (isDay) R.color.accent_cyan else R.color.text_secondary))
+            val tz = java.util.TimeZone.getTimeZone(zone)
+            timeFormat.timeZone = tz; dateFormat.timeZone = tz
+            row.time.text = timeFormat.format(now)
+            val hour = SimpleDateFormat("H", Locale.ROOT).apply { timeZone = tz }.format(now).toIntOrNull() ?: 12
+            row.dayStatus.text = (if (hour in 6..17) "☀️ روز" else "🌙 شب") + "  •  " + dateFormat.format(now)
+            row.dayStatus.setTextColor(getColor(if (hour in 6..17) R.color.accent_cyan else R.color.text_secondary))
         }
         handler.removeCallbacks(tick)
         handler.postDelayed(tick, 1000)
     }
 
     private val tick = Runnable { updateTimes() }
-    override fun onDestroy() {
-        handler.removeCallbacks(tick)
-        super.onDestroy()
-    }
+    override fun onDestroy() { handler.removeCallbacks(tick); super.onDestroy() }
 }
