@@ -17,7 +17,8 @@ object SnoozeHelper {
         ringtoneUri: String,
         vibrate: Boolean,
         wakeMode: String = "NONE",
-        mathDifficulty: String = "MEDIUM"
+        mathDifficulty: String = "MEDIUM",
+        deleteAfterRinging: Boolean = false
     ) {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerTime = Calendar.getInstance().apply {
@@ -31,6 +32,7 @@ object SnoozeHelper {
             putExtra("vibrate", vibrate)
             putExtra("wake_mode", wakeMode)
             putExtra("math_difficulty", mathDifficulty)
+            putExtra("delete_after_ringing", deleteAfterRinging)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
@@ -61,6 +63,7 @@ class SnoozeReceiver : BroadcastReceiver() {
             putExtra("vibrate", intent.getBooleanExtra("vibrate", true))
             putExtra("wake_mode", intent.getStringExtra("wake_mode") ?: "NONE")
             putExtra("math_difficulty", intent.getStringExtra("math_difficulty") ?: "MEDIUM")
+            putExtra("delete_after_ringing", intent.getBooleanExtra("delete_after_ringing", false))
         }
         context.startActivity(ringIntent)
     }
