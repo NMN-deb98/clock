@@ -1,7 +1,6 @@
 package com.example.alarmclock
 
 import android.os.Bundle
-import android.icu.util.TimeZone as IcuTimeZone
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
@@ -36,26 +35,57 @@ class WorldClockActivity : AppCompatActivity() {
     private data class CountryChoice(val code: String, val faName: String, val enName: String, val flag: String)
     private data class ClockRow(val time: TextView, val dayStatus: TextView)
 
+    // Deliberately use a small, fixed list of widely used time zones.
+    // The previous implementation queried ICU for every ISO country on the UI
+    // thread, which could freeze or crash on some Android/device ICU versions.
     private val allZones: List<ZoneChoice> by lazy {
-        // Use Android's country-specific time-zone database instead of inferring a
-        // country from ICU region metadata, which can return the world region ("001")
-        // for aliases or IDs not recognized by that metadata version.
-        Locale.getISOCountries().asSequence()
-            .flatMap { code ->
-                IcuTimeZone.getAvailableIDs(code).asSequence()
-                    .filter { it.contains('/') && !it.startsWith("Etc/") && !it.startsWith("SystemV/") }
-                    .distinct()
-                    .map { id ->
-                        val city = id.substringAfterLast('/')
-                            .replace('_', ' ')
-                            .replace('-', ' ')
-                        ZoneChoice(id, city, code)
-                    }
-            }
-            .distinctBy { it.id }
-            .toList()
+        listOf(
+            ZoneChoice("Asia/Tehran", "تهران", "IR"),
+            ZoneChoice("Europe/London", "لندن", "GB"),
+            ZoneChoice("Europe/Paris", "پاریس", "FR"),
+            ZoneChoice("Europe/Berlin", "برلین", "DE"),
+            ZoneChoice("Europe/Rome", "رم", "IT"),
+            ZoneChoice("Europe/Madrid", "مادرید", "ES"),
+            ZoneChoice("Europe/Amsterdam", "آمستردام", "NL"),
+            ZoneChoice("Europe/Athens", "آتن", "GR"),
+            ZoneChoice("Europe/Istanbul", "استانبول", "TR"),
+            ZoneChoice("Europe/Moscow", "مسکو", "RU"),
+            ZoneChoice("Europe/Kyiv", "کی‌یف", "UA"),
+            ZoneChoice("Africa/Cairo", "قاهره", "EG"),
+            ZoneChoice("Africa/Johannesburg", "ژوهانسبورگ", "ZA"),
+            ZoneChoice("Asia/Dubai", "دبی", "AE"),
+            ZoneChoice("Asia/Riyadh", "ریاض", "SA"),
+            ZoneChoice("Asia/Baghdad", "بغداد", "IQ"),
+            ZoneChoice("Asia/Kuwait", "کویت", "KW"),
+            ZoneChoice("Asia/Qatar", "دوحه", "QA"),
+            ZoneChoice("Asia/Jerusalem", "اورشلیم", "IL"),
+            ZoneChoice("Asia/Kabul", "کابل", "AF"),
+            ZoneChoice("Asia/Karachi", "کراچی", "PK"),
+            ZoneChoice("Asia/Kolkata", "دهلی / کلکته", "IN"),
+            ZoneChoice("Asia/Dhaka", "داکا", "BD"),
+            ZoneChoice("Asia/Kathmandu", "کاتماندو", "NP"),
+            ZoneChoice("Asia/Bangkok", "بانکوک", "TH"),
+            ZoneChoice("Asia/Jakarta", "جاکارتا", "ID"),
+            ZoneChoice("Asia/Singapore", "سنگاپور", "SG"),
+            ZoneChoice("Asia/Hong_Kong", "هنگ‌کنگ", "HK"),
+            ZoneChoice("Asia/Shanghai", "شانگهای", "CN"),
+            ZoneChoice("Asia/Tokyo", "توکیو", "JP"),
+            ZoneChoice("Asia/Seoul", "سئول", "KR"),
+            ZoneChoice("Australia/Sydney", "سیدنی", "AU"),
+            ZoneChoice("Australia/Melbourne", "ملبورن", "AU"),
+            ZoneChoice("Pacific/Auckland", "اوکلند", "NZ"),
+            ZoneChoice("America/New_York", "نیویورک", "US"),
+            ZoneChoice("America/Chicago", "شیکاگو", "US"),
+            ZoneChoice("America/Denver", "دنور", "US"),
+            ZoneChoice("America/Los_Angeles", "لس‌آنجلس", "US"),
+            ZoneChoice("America/Toronto", "تورنتو", "CA"),
+            ZoneChoice("America/Vancouver", "ونکوور", "CA"),
+            ZoneChoice("America/Mexico_City", "مکزیکوسیتی", "MX"),
+            ZoneChoice("America/Sao_Paulo", "سائوپائولو", "BR"),
+            ZoneChoice("America/Argentina/Buenos_Aires", "بوئنوس آیرس", "AR"),
+            ZoneChoice("Atlantic/Reykjavik", "ریکیاویک", "IS")
+        )
     }
-
     private val allCountries: List<CountryChoice> by lazy {
         allZones.map { it.countryCode }.distinct().mapNotNull { code ->
             val locale = Locale("", code)
@@ -70,10 +100,7 @@ class WorldClockActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         selected.addAll(prefs.getStringSet("zones", setOf("Asia/Tehran", "Europe/London", "America/New_York")) ?: emptySet())
-        val validZones = allZones.map { it.id }.toSet()
-        selected.retainAll(validZones)
-
-        val root = LinearLayout(this).apply {
+val root = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             setPadding(20, 20, 20, 14)
             layoutDirection = View.LAYOUT_DIRECTION_RTL
@@ -215,7 +242,8 @@ class WorldClockActivity : AppCompatActivity() {
             setPadding(16, 32, 16, 32)
         })
         selected.forEach { id ->
-            val zone = allZones.firstOrNull { it.id == id } ?: return@forEach
+            val zone = allZones.firstOrNull { it.id == id }
+                ?: ZoneChoice(id, id.substringAfterLast('/').replace('_', ' '), "")
             val row = LinearLayout(this).apply {
                 orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL
                 layoutDirection = View.LAYOUT_DIRECTION_RTL; setPadding(14, 14, 14, 14)
