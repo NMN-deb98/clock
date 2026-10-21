@@ -95,15 +95,19 @@ class StopwatchActivity : AppCompatActivity() {
         liveRow.addView(status)
         timerCard.addView(liveRow)
 
-        display = label("00:00.00", 43f, primaryText, true).apply {
+        timerCard.addView(label("دقیقه : ثانیه . صدم‌ثانیه", 12f, secondaryText).apply {
             gravity = Gravity.CENTER
+            setPadding(0, dp(12), 0, 0)
+        })
+        display = label("۰۰:۰۰.۰۰", 43f, primaryText, true).apply {
+            gravity = Gravity.CENTER
+            textDirection = View.TEXT_DIRECTION_LTR
             typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
             letterSpacing = 0.015f
-            setPadding(0, dp(22), 0, dp(8))
+            setPadding(0, dp(12), 0, dp(8))
             includeFontPadding = false
         }
         timerCard.addView(display)
-        timerCard.addView(label("دقیقه : ثانیه . صدم‌ثانیه", 12f, secondaryText).apply { gravity = Gravity.CENTER })
         root.addView(timerCard)
 
         val stats = LinearLayout(this).apply {
@@ -191,9 +195,9 @@ class StopwatchActivity : AppCompatActivity() {
             textSize = 15f
             typeface = Typeface.DEFAULT_BOLD
             setTextColor(textColor)
-            backgroundTintList = android.content.res.ColorStateList.valueOf(backgroundColor)
+            background = rounded(backgroundColor, dp(24), getColor(R.color.surface_border))
             isAllCaps = false
-            minHeight = dp(52)
+            minHeight = dp(52); isStateListAnimatorEnabled = true
         }
 
     private fun label(value: String, size: Float, color: Int, bold: Boolean = false) =
@@ -279,7 +283,7 @@ class StopwatchActivity : AppCompatActivity() {
             else -> "آماده شروع"
         }
         status.setTextColor(if (running) cyan else secondaryText)
-        startButton.backgroundTintList = android.content.res.ColorStateList.valueOf(if (running) violet else cyan)
+        startButton.background = rounded(if (running) violet else cyan, dp(24), getColor(R.color.surface_border))
         startButton.setTextColor(getColor(R.color.app_background))
         lapButton.isEnabled = running || accumulated > 0L
         lapButton.alpha = if (lapButton.isEnabled) 1f else 0.55f
@@ -287,7 +291,7 @@ class StopwatchActivity : AppCompatActivity() {
 
     private fun elapsed() = accumulated + if (running) SystemClock.elapsedRealtime() - startedAt else 0L
     private fun updateDisplay() {
-        display.text = format(elapsed())
+        display.text = toPersianDigits(format(elapsed()))
         val hue = ((android.os.SystemClock.uptimeMillis() / 40L) % 360L).toFloat()
         display.setTextColor(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.72f, 1f)))
     }
