@@ -13,5 +13,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "AlarmApp"
+rootProject.name = "Hooshyar"
 include ':app'
