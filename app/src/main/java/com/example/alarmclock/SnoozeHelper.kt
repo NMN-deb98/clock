@@ -5,10 +5,8 @@ import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import java.util.Calendar
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 
 object SnoozeHelper {
 
@@ -23,9 +21,12 @@ object SnoozeHelper {
         mathDifficulty: String = "MEDIUM",
         deleteAfterRinging: Boolean = false
     ) {
+        if (alarmId < 0 || minutes <= 0) return
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerTime = Calendar.getInstance().apply {
             add(Calendar.MINUTE, minutes)
+            set(Calendar.SECOND, 0)
+            set(Calendar.MILLISECOND, 0)
         }.timeInMillis
 
         val intent = Intent(context, SnoozeReceiver::class.java).apply {
@@ -39,37 +40,51 @@ object SnoozeHelper {
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
-            10000 + alarmId, // شناسه جدا برای هشدار به‌تعویق‌افتاده تا با اصلی تداخل نکند
+            10000 + alarmId,
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        alarmManager.setAlarmClock(
-            AlarmManager.AlarmClockInfo(triggerTime, pendingIntent),
-            pendingIntent
-        )
+        try {
+            alarmManager.setAlarmClock(
+                AlarmManager.AlarmClockInfo(triggerTime, pendingIntent),
+                pendingIntent
+            )
+        } catch (_: SecurityException) {
+            // Exact-alarm access can be revoked while the app is running.
+            // Avoid crashing; callers can restore exact-alarm access in Settings.
+        }
     }
 }
 
 /**
- * وقتی زمان تعویق تمام شود، دوباره صفحه هشدار را با همان تنظیمات (در صورت وجود در دیتابیس) نشان می‌دهد.
+ * The snooze broadcast must start the ringing service itself. Relying only on a
+ * background notification/full-screen intent can silently fail on newer Android
+ * versions, leaving the user with no sound after the snooze interval.
  */
 class SnoozeReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val alarmId = intent.getIntExtra("alarm_id", -1)
-        if (alarmId == -1) return
+        if (alarmId < 0) return
 
-        val pendingResult = goAsync()
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                val alarm = AlarmDatabase.getInstance(context).alarmDao().getById(alarmId)
-                if (alarm != null) {
-                    // Reuse the alarm notification's full-screen intent instead of starting
-                    // an activity directly from the background.
-                    NotificationHelper.showAlarmNotification(context, alarm)
-                }
-            } finally {
-                pendingResult.finish()
+        val serviceIntent = Intent(context, AlarmRingingService::class.java).apply {
+            putExtra("alarm_id", alarmId)
+            putExtra("label", intent.getStringExtra("label").orEmpty())
+            putExtra("ringtone_uri", intent.getStringExtra("ringtone_uri").orEmpty())
+            putExtra("vibrate", intent.getBooleanExtra("vibrate", true))
+            putExtra("wake_mode", intent.getStringExtra("wake_mode") ?: "NONE")
+            putExtra("math_difficulty", intent.getStringExtra("math_difficulty") ?: "MEDIUM")
+            putExtra("delete_after_ringing", intent.getBooleanExtra("delete_after_ringing", false))
+        }
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                context.startForegroundService(serviceIntent)
+            } else {
+                context.startService(serviceIntent)
             }
+        } catch (_: RuntimeException) {
+            // Do not crash the receiver if Android blocks background service launch.
+            // The scheduled alarm remains handled by the OS and the next app launch
+            // can surface diagnostics/permissions to the user.
         }
     }
 }
