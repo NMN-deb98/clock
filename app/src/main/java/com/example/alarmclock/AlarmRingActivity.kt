@@ -19,6 +19,8 @@ import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 import com.example.alarmclock.databinding.ActivityAlarmRingBinding
 import kotlin.random.Random
 
@@ -27,6 +29,7 @@ class AlarmRingActivity : AppCompatActivity() {
     private var ringtone: Ringtone? = null
     private var vibrator: Vibrator? = null
     private var alarmId: Int = -1
+    private var deleteAfterRinging: Boolean = false
     private var wakeMode: String = "NONE"
     private var mathDifficulty: String = "MEDIUM"
     private var mathQuestions: List<MathQuestion> = emptyList()
@@ -60,6 +63,7 @@ class AlarmRingActivity : AppCompatActivity() {
         val shouldVibrate = intent.getBooleanExtra("vibrate", true)
         wakeMode = intent.getStringExtra("wake_mode") ?: "NONE"
         mathDifficulty = intent.getStringExtra("math_difficulty") ?: "MEDIUM"
+        deleteAfterRinging = intent.getBooleanExtra("delete_after_ringing", false)
         binding.textNote.text = label.ifBlank { getString(R.string.no_note) }
 
         startRinging(ringtoneUriString)
@@ -274,6 +278,12 @@ class AlarmRingActivity : AppCompatActivity() {
         ringtone?.stop()
         vibrator?.cancel()
         NotificationHelper.cancelNotification(this, alarmId)
+        if (deleteAfterRinging && alarmId != -1) {
+            AlarmScheduler.cancel(this, Alarm(id = alarmId, hour = 0, minute = 0))
+            lifecycleScope.launch {
+                AlarmDatabase.getInstance(this@AlarmRingActivity).alarmDao().deleteById(alarmId)
+            }
+        }
         finish()
     }
 
@@ -292,7 +302,7 @@ class AlarmRingActivity : AppCompatActivity() {
 
     @Deprecated("Deprecated in Android API; kept to prevent bypassing wake-up challenges")
     override fun onBackPressed() {
-        if (wakeMode == "NONE") super.onBackPressed()
+        if (wakeMode == "NONE") stopAndFinish()
         else android.widget.Toast.makeText(this, "برای خاموش کردن هشدار، چالش را کامل کن.", android.widget.Toast.LENGTH_SHORT).show()
     }
 
