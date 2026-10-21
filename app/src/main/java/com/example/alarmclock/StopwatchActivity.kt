@@ -194,8 +194,6 @@ class StopwatchActivity : AppCompatActivity() {
             backgroundTintList = android.content.res.ColorStateList.valueOf(backgroundColor)
             isAllCaps = false
             minHeight = dp(52)
-            insetTop = 0
-            insetBottom = 0
         }
 
     private fun label(value: String, size: Float, color: Int, bold: Boolean = false) =
