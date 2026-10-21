@@ -1,5 +1,6 @@
 package com.example.alarmclock
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.media.Ringtone
 import android.media.RingtoneManager
@@ -171,6 +172,10 @@ class AlarmRingActivity : AppCompatActivity() {
         return questions.map { MathQuestion(it.key, it.value) }.shuffled()
     }
 
+    private fun toPersianDigits(value: String): String = value.map { ch ->
+        if (ch in '0'..'9') ('۰'.code + (ch - '0')).toChar() else ch
+    }.joinToString("")
+
     private fun showMathQuestion() {
         if (mathIndex >= mathQuestions.size) {
             stopAndFinish()
@@ -197,7 +202,10 @@ class AlarmRingActivity : AppCompatActivity() {
                 setTextColor(getColor(R.color.accent_cyan))
             })
             addView(TextView(this@AlarmRingActivity).apply {
-                text = question.prompt
+                text = "${toPersianDigits(question.prompt)} = ؟"
+                // Render the complete expression LTR; Persian digits retain their intended visual order.
+                textDirection = View.TEXT_DIRECTION_LTR
+                textAlignment = View.TEXT_ALIGNMENT_CENTER
                 textSize = 34f
                 gravity = android.view.Gravity.CENTER
                 setTextColor(getColor(R.color.text_primary))
@@ -282,9 +290,11 @@ class AlarmRingActivity : AppCompatActivity() {
             AlarmScheduler.cancel(this, Alarm(id = alarmId, hour = 0, minute = 0))
             lifecycleScope.launch {
                 AlarmDatabase.getInstance(this@AlarmRingActivity).alarmDao().deleteById(alarmId)
+                finish()
             }
+        } else {
+            finish()
         }
-        finish()
     }
 
     private fun snoozeAndFinish() {
@@ -301,6 +311,8 @@ class AlarmRingActivity : AppCompatActivity() {
         finish()
     }
 
+    // Intentionally do not call super: the wake-up challenge must not be bypassed with Back.
+    @SuppressLint("MissingSuperCall")
     @Deprecated("Deprecated in Android API; kept to prevent bypassing wake-up challenges")
     override fun onBackPressed() {
         if (wakeMode == "NONE") stopAndFinish()

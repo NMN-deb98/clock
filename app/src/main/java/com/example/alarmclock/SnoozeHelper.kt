@@ -6,6 +6,9 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import java.util.Calendar
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 object SnoozeHelper {
 
@@ -55,16 +58,18 @@ class SnoozeReceiver : BroadcastReceiver() {
         val alarmId = intent.getIntExtra("alarm_id", -1)
         if (alarmId == -1) return
 
-        val ringIntent = Intent(context, AlarmRingActivity::class.java).apply {
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            putExtra("alarm_id", alarmId)
-            putExtra("label", intent.getStringExtra("label") ?: "")
-            putExtra("ringtone_uri", intent.getStringExtra("ringtone_uri") ?: "")
-            putExtra("vibrate", intent.getBooleanExtra("vibrate", true))
-            putExtra("wake_mode", intent.getStringExtra("wake_mode") ?: "NONE")
-            putExtra("math_difficulty", intent.getStringExtra("math_difficulty") ?: "MEDIUM")
-            putExtra("delete_after_ringing", intent.getBooleanExtra("delete_after_ringing", false))
+        val pendingResult = goAsync()
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                val alarm = AlarmDatabase.getInstance(context).alarmDao().getById(alarmId)
+                if (alarm != null) {
+                    // Reuse the alarm notification's full-screen intent instead of starting
+                    // an activity directly from the background.
+                    NotificationHelper.showAlarmNotification(context, alarm)
+                }
+            } finally {
+                pendingResult.finish()
+            }
         }
-        context.startActivity(ringIntent)
     }
 }

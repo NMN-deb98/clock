@@ -31,7 +31,7 @@ class SplashActivity : AppCompatActivity() {
         }
         root.addView(TickingClockView(this), LinearLayout.LayoutParams(220, 220))
         root.addView(TextView(this).apply {
-            text = "ساعت هشدار حرفه‌ای"
+            text = "هوشیار"
             textSize = 25f
             setTextColor(getColor(R.color.text_primary))
             gravity = android.view.Gravity.CENTER
@@ -39,7 +39,7 @@ class SplashActivity : AppCompatActivity() {
             setPadding(0, 24, 0, 8)
         })
         root.addView(TextView(this).apply {
-            text = "هر لحظه، دقیق‌تر"
+            text = "Hooshyar • هر لحظه، دقیق‌تر"
             textSize = 14f
             setTextColor(getColor(R.color.accent_cyan))
             gravity = android.view.Gravity.CENTER

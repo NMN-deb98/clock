@@ -2,6 +2,7 @@ package com.example.alarmclock
 
 import android.Manifest
 import android.app.AlarmManager
+import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -24,6 +25,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: AlarmViewModel
     private lateinit var adapter: AlarmAdapter
     private var latestAlarms: List<Alarm> = emptyList()
+    private var fullScreenSettingsLaunched = false
     private val countdownHandler = Handler(Looper.getMainLooper())
     private val countdownTick = object : Runnable {
         override fun run() {
@@ -100,7 +102,24 @@ class MainActivity : AppCompatActivity() {
             if (ch in '0'..'9') ('۰'.code + (ch - '0')).toChar() else ch
         }.joinToString("")
 
-    override fun onResume() { super.onResume(); countdownHandler.removeCallbacks(countdownTick); countdownHandler.post(countdownTick) }
+    override fun onResume() {
+        super.onResume()
+        countdownHandler.removeCallbacks(countdownTick)
+        countdownHandler.post(countdownTick)
+        requestFullScreenAlarmAccessIfNeeded()
+    }
+
+    private fun requestFullScreenAlarmAccessIfNeeded() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && !fullScreenSettingsLaunched) {
+            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
+            if (!manager.canUseFullScreenIntent()) {
+                fullScreenSettingsLaunched = true
+                startActivity(Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
+                    data = Uri.parse("package:$packageName")
+                })
+            }
+        }
+    }
     override fun onPause() { countdownHandler.removeCallbacks(countdownTick); super.onPause() }
 
     private fun askNotificationPermissionIfNeeded() {

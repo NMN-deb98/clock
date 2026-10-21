@@ -97,7 +97,7 @@ class CountdownTimerActivity : AppCompatActivity() {
                 val chip = Button(this).apply {
                     text = toPersian(minutes.toString()) + " دقیقه"; textSize = 12f; isAllCaps = false
                     setTextColor(primary); backgroundTintList = ColorStateList.valueOf(elevated)
-                    insetTop = 0; insetBottom = 0; minHeight = dp(42)
+                    ; minHeight = dp(42)
                     setOnClickListener { choosePreset(minutes) }
                 }
                 row.addView(chip, LinearLayout.LayoutParams(0, dp(42), 1f).apply {
@@ -235,7 +235,7 @@ class CountdownTimerActivity : AppCompatActivity() {
     private fun actionButton(label: String, color: Int, textColor: Int) = Button(this).apply {
         text = label; textSize = 14f; typeface = Typeface.DEFAULT_BOLD; isAllCaps = false
         setTextColor(textColor); backgroundTintList = ColorStateList.valueOf(color)
-        minHeight = dp(52); insetTop = 0; insetBottom = 0
+        minHeight = dp(52); 
     }
 
     private fun text(value: String, size: Float, color: Int, bold: Boolean = false) = TextView(this).apply {
@@ -249,7 +249,7 @@ class CountdownTimerActivity : AppCompatActivity() {
     }
 
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
-    private fun toPersian(value: String): String = value.map { if (it in '0'..'9') ('۰'.code + it - '0').toChar() else it }.joinToString("")
+    private fun toPersian(value: String): String = value.map { ch -> if (ch in '0'..'9') ('۰'.code + (ch.code - '0'.code)).toChar() else ch }.joinToString("")
 
     override fun onDestroy() { timer?.cancel(); super.onDestroy() }
 
