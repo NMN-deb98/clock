@@ -37,6 +37,9 @@ object NotificationHelper {
             putExtra("label", alarm.label)
             putExtra("ringtone_uri", alarm.ringtoneUri)
             putExtra("vibrate", alarm.vibrate)
+            putExtra("wake_mode", alarm.wakeMode)
+            putExtra("math_difficulty", alarm.mathDifficulty)
+            putExtra("delete_after_ringing", alarm.deleteAfterRinging)
         }
         val fullScreenPendingIntent = PendingIntent.getActivity(
             context, alarm.id, fullScreenIntent,
