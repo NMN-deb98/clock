@@ -2,7 +2,7 @@ name: Build Hooshyar APK
 
 on:
   push:
-    branches: [main, feature/professional-alarm-clock, redesign/premium-clock-ui, feature/persian-premium-navigation]
+    branches: [main, feature/professional-alarm-clock, redesign/premium-clock-ui, feature/persian-premium-navigation, feature/hooshyar-name-math-rtl]
   workflow_dispatch:
 
 permissions:
