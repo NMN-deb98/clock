@@ -71,7 +71,7 @@ class WorldClockActivity : AppCompatActivity() {
         searchInput = EditText(this).apply {
             hint = "جست‌وجوی شهر یا کشور…"
             textSize = 14f
-            singleLine = true
+            setSingleLine(true)
             layoutDirection = View.LAYOUT_DIRECTION_RTL
             background = getDrawable(R.drawable.bg_input_field)
             setPadding(16, 10, 16, 10)
