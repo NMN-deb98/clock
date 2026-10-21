@@ -98,7 +98,7 @@ class CountdownTimerActivity : AppCompatActivity() {
                 val chip = Button(this).apply {
                     text = toPersian(minutes.toString()) + " دقیقه"; textSize = 12f; isAllCaps = false
                     setTextColor(primary); background = rounded(elevated, dp(18), border)
-                    minHeight = dp(42); isStateListAnimatorEnabled = true
+                    minHeight = dp(42)
                     setOnClickListener { choosePreset(minutes) }
                 }
                 row.addView(chip, LinearLayout.LayoutParams(0, dp(42), 1f).apply {
@@ -250,7 +250,7 @@ class CountdownTimerActivity : AppCompatActivity() {
     private fun actionButton(label: String, color: Int, textColor: Int) = Button(this).apply {
         text = label; textSize = 14f; typeface = Typeface.DEFAULT_BOLD; isAllCaps = false
         setTextColor(textColor); background = rounded(color, dp(24), border)
-        minHeight = dp(52); isStateListAnimatorEnabled = true 
+        minHeight = dp(52) 
     }
 
     private fun text(value: String, size: Float, color: Int, bold: Boolean = false) = TextView(this).apply {
