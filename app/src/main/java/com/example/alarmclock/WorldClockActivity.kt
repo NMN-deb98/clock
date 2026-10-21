@@ -1,6 +1,7 @@
 package com.example.alarmclock
 
 import android.os.Bundle
+import android.icu.util.TimeZone as IcuTimeZone
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
@@ -41,7 +42,7 @@ class WorldClockActivity : AppCompatActivity() {
         // for aliases or IDs not recognized by that metadata version.
         Locale.getISOCountries().asSequence()
             .flatMap { code ->
-                java.util.TimeZone.getAvailableIDs(code).asSequence()
+                IcuTimeZone.getAvailableIDs(code).asSequence()
                     .filter { it.contains('/') && !it.startsWith("Etc/") && !it.startsWith("SystemV/") }
                     .distinct()
                     .map { id ->
