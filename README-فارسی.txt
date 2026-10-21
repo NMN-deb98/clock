@@ -7,7 +7,7 @@
 
 مراحل:
 1) Android Studio را نصب کنید (رایگان): https://developer.android.com/studio
-2) از منوی Android Studio گزینه Open را بزنید و پوشه AlarmApp را انتخاب کنید.
+2) از منوی Android Studio گزینه Open را بزنید و پوشه Hooshyar را انتخاب کنید.
 3) صبر کنید تا Gradle Sync تمام شود (بار اول ممکن است چند دقیقه طول بکشد
    چون کتابخانه‌ها دانلود می‌شوند - نیاز به اینترنت دارد).
 4) از منوی بالا: Build > Build Bundle(s) / APK(s) > Build APK(s)
