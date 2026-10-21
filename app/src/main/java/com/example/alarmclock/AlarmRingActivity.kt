@@ -296,7 +296,8 @@ class AlarmRingActivity : AppCompatActivity() {
             ringtoneUri = intent.getStringExtra("ringtone_uri") ?: "",
             vibrate = intent.getBooleanExtra("vibrate", true),
             wakeMode = wakeMode,
-            mathDifficulty = mathDifficulty)
+            mathDifficulty = mathDifficulty,
+            deleteAfterRinging = deleteAfterRinging)
         finish()
     }
 
