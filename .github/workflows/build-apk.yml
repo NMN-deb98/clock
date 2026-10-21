@@ -1,4 +1,4 @@
-name: Build Clock APK
+name: Build Hooshyar APK
 
 on:
   push:
@@ -49,18 +49,20 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: clock-debug-apk
+          name: Hooshyar-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 30
 
-      - name: Publish APK to GitHub Release
-        if: github.ref == 'refs/heads/main'
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="v1.0.${{ github.run_number }}"
-          gh release create "$TAG" app/build/outputs/apk/debug/app-debug.apk \
-            --repo "${{ github.repository }}" \
-            --title "Professional Alarm Clock $TAG" \
-            --notes "نسخه قابل دانلود برنامه ساعت هشدار حرفه‌ای. این APK از سورس همین نسخه ساخته شده است."
+      - name: Prepare Hooshyar APK for download
+        run: cp app/build/outputs/apk/debug/app-debug.apk "Hooshyar-v1.0.${{ github.run_number }}.apk"
+
+      - name: Upload named Hooshyar APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Hooshyar-APK
+          path: Hooshyar-v1.0.${{ github.run_number }}.apk
+          if-no-files-found: error
+          retention-days: 30
+
+      # GitHub Releases will be published manually after the user requests final testing and release.
