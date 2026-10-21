@@ -12,8 +12,10 @@ android {
         applicationId "com.example.alarmclock"
         minSdk 26
         targetSdk 34
-        versionCode 1
-        versionName "1.0"
+        // Keep the installed Android version in sync with the GitHub Release tag.
+        def releaseNumber = (System.getenv("GITHUB_RUN_NUMBER") ?: "1").toInteger()
+        versionCode releaseNumber
+        versionName "1.0.${releaseNumber}"
     }
 
     buildTypes {
