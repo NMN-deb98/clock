@@ -18,17 +18,8 @@ class AlarmReceiver : BroadcastReceiver() {
                 val alarm = dao.getById(alarmId)
                 if (alarm != null && alarm.enabled) {
                     NotificationHelper.showAlarmNotification(context, alarm)
-                    val ringIntent = Intent(context, AlarmRingActivity::class.java).apply {
-                        addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
-                        putExtra("alarm_id", alarm.id)
-                        putExtra("label", alarm.label)
-                        putExtra("ringtone_uri", alarm.ringtoneUri)
-                        putExtra("vibrate", alarm.vibrate)
-                        putExtra("wake_mode", alarm.wakeMode)
-                        putExtra("math_difficulty", alarm.mathDifficulty)
-                        putExtra("delete_after_ringing", alarm.deleteAfterRinging)
-                    }
-                    context.startActivity(ringIntent)
+                    // NotificationHelper attaches a full-screen intent. Android can then
+                    // show the alarm over the lock screen when the user has allowed it.
                     if (!alarm.deleteAfterRinging) {
                         // اگر قرار نیست حذف شود، زمان بعدی را از همین حالا تنظیم کن.
                         // هشدار تکرارشونده طبق روزهای انتخاب‌شده؛ یک‌باره در روز بعد تکرار می‌شود.
