@@ -1,5 +1,6 @@
 package com.example.alarmclock
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.media.Ringtone
 import android.media.RingtoneManager
@@ -310,6 +311,8 @@ class AlarmRingActivity : AppCompatActivity() {
         finish()
     }
 
+    // Intentionally do not call super: the wake-up challenge must not be bypassed with Back.
+    @SuppressLint("MissingSuperCall")
     @Deprecated("Deprecated in Android API; kept to prevent bypassing wake-up challenges")
     override fun onBackPressed() {
         if (wakeMode == "NONE") stopAndFinish()
