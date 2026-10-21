@@ -24,7 +24,6 @@ import kotlin.math.min
 
 class CountdownTimerActivity : AppCompatActivity() {
     private lateinit var display: TextView
-    private lateinit var status: TextView
     private lateinit var hoursPicker: NumberPicker
     private lateinit var minutesPicker: NumberPicker
     private lateinit var secondsPicker: NumberPicker
@@ -83,8 +82,6 @@ class CountdownTimerActivity : AppCompatActivity() {
             includeFontPadding = false; setPadding(0, dp(8), 0, dp(5))
         }
         center.addView(display)
-        status = text("آماده شروع", 13f, cyan, true)
-        center.addView(status)
         ringFrame.addView(center, FrameLayout.LayoutParams(-1, -1))
         card.addView(ringFrame)
         // Quick presets remain available without an extra section heading.
@@ -114,8 +111,12 @@ class CountdownTimerActivity : AppCompatActivity() {
         }
         // Numeric selectors remain available without helper copy.
         val labels = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; layoutDirection = View.LAYOUT_DIRECTION_RTL }
-        // Extra Persian unit labels removed as requested.
         val pickers = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; layoutDirection = View.LAYOUT_DIRECTION_RTL }
+        listOf("ساعت", "دقیقه", "ثانیه").forEach { unit ->
+            labels.addView(text(unit, 13f, secondary, true).apply { gravity = Gravity.CENTER },
+                LinearLayout.LayoutParams(0, dp(28), 1f))
+        }
+        pickerCard.addView(labels)
         hoursPicker = NumberPicker(this).apply {
             minValue = 0; maxValue = 100; value = 0; wrapSelectorWheel = false
             setOnValueChangedListener { _, _, _ -> if (!running) syncFromPickers() }
@@ -218,13 +219,6 @@ class CountdownTimerActivity : AppCompatActivity() {
         display.setTextColor(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.72f, 1f)))
         ring.setLiveColor(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.8f, 1f)))
         ring.setProgress(if (totalDurationMs > 0L) remainingMs.toFloat() / totalDurationMs else 1f)
-        status.text = when {
-            completed -> "پایان زمان"
-            running -> "در حال شمارش"
-            remainingMs < totalDurationMs && remainingMs > 0L -> "متوقف شده"
-            else -> "آماده شروع"
-        }
-        status.setTextColor(if (completed) violet else if (running) cyan else secondary)
     }
 
     private fun updateControls() {

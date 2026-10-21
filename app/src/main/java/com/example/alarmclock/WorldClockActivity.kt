@@ -1,7 +1,7 @@
 package com.example.alarmclock
 
-import android.icu.util.TimeZone as IcuTimeZone
 import android.os.Bundle
+import android.icu.util.TimeZone as IcuTimeZone
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
@@ -37,14 +37,22 @@ class WorldClockActivity : AppCompatActivity() {
     private data class ClockRow(val time: TextView, val dayStatus: TextView)
 
     private val allZones: List<ZoneChoice> by lazy {
-        java.util.TimeZone.getAvailableIDs().asSequence()
-            .filter { it.contains('/') && !it.startsWith("Etc/") && !it.startsWith("SystemV/") }
-            .distinct()
-            .map { id ->
-                val parts = id.split('/')
-                ZoneChoice(id, parts.last().replace('_', ' ').replace('-', ' '), runCatching { IcuTimeZone.getRegion(id) }.getOrNull() ?: "001")
+        // Use Android's country-specific time-zone database instead of inferring a
+        // country from ICU region metadata, which can return the world region ("001")
+        // for aliases or IDs not recognized by that metadata version.
+        Locale.getISOCountries().asSequence()
+            .flatMap { code ->
+                IcuTimeZone.getAvailableIDs(code).asSequence()
+                    .filter { it.contains('/') && !it.startsWith("Etc/") && !it.startsWith("SystemV/") }
+                    .distinct()
+                    .map { id ->
+                        val city = id.substringAfterLast('/')
+                            .replace('_', ' ')
+                            .replace('-', ' ')
+                        ZoneChoice(id, city, code)
+                    }
             }
-            .filter { it.countryCode.matches(Regex("[A-Z]{2}")) && it.countryCode != "ZZ" }
+            .distinctBy { it.id }
             .toList()
     }
 
@@ -91,12 +99,14 @@ class WorldClockActivity : AppCompatActivity() {
 
         countrySpinner = Spinner(this).apply { background = getDrawable(R.drawable.bg_input_field); setPadding(10, 4, 10, 4) }
         filteredCountries = allCountries
-        countryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, filteredCountries.map { "${it.flag}  ${it.faName}  ·  ${it.enName}" })
+        countryAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, filteredCountries.map { "${it.flag}  ${it.faName}  ·  ${it.enName}" })
+        countryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         countrySpinner.adapter = countryAdapter
         root.addView(countrySpinner, ViewGroup.LayoutParams(-1, -2))
 
         citySpinner = Spinner(this).apply { background = getDrawable(R.drawable.bg_input_field); setPadding(10, 4, 10, 4) }
-        cityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_dropdown_item, emptyList<String>())
+        cityAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, emptyList<String>())
+        cityAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         citySpinner.adapter = cityAdapter
         root.addView(citySpinner, ViewGroup.LayoutParams(-1, -2))
 
