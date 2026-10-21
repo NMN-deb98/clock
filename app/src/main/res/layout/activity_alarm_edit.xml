@@ -110,6 +110,16 @@
         </LinearLayout>
 
         <CheckBox
+            android:id="@+id/checkDeleteAfterRinging"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:buttonTint="@color/accent_cyan"
+            android:checked="false"
+            android:text="حذف بعد از زنگ خوردن"
+            android:textColor="@color/text_primary" />
+
+        <CheckBox
             android:id="@+id/checkVibrate"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
