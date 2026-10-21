@@ -25,8 +25,6 @@ object SnoozeHelper {
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerTime = Calendar.getInstance().apply {
             add(Calendar.MINUTE, minutes)
-            set(Calendar.SECOND, 0)
-            set(Calendar.MILLISECOND, 0)
         }.timeInMillis
 
         val intent = Intent(context, SnoozeReceiver::class.java).apply {
