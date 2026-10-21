@@ -56,9 +56,8 @@ class CountdownTimerActivity : AppCompatActivity() {
             layoutDirection = View.LAYOUT_DIRECTION_RTL
         }
         val header = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER_VERTICAL }
-        val titleBlock = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
-        titleBlock.addView(text("زمان‌سنج", 27f, primary, true))
-        titleBlock.addView(text("زمانت را مدیریت کن", 13f, secondary).apply { setPadding(0, dp(4), 0, 0) })
+        val titleBlock = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.END or Gravity.CENTER_VERTICAL; layoutParams = LinearLayout.LayoutParams(0, -2, 1f) }
+        titleBlock.addView(text("زمان‌سنج", 27f, primary, true).apply { gravity = Gravity.END })
         header.addView(titleBlock)
         header.addView(TextView(this).apply {
             text = "◴"; textSize = 28f; gravity = Gravity.CENTER; setTextColor(cyan)
@@ -78,7 +77,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         ring = TimerRingView().apply { setColors(border, cyan, violet) }
         ringFrame.addView(ring, FrameLayout.LayoutParams(-1, -1))
         val center = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER }
-        center.addView(text("زمان باقی‌مانده", 13f, secondary))
+        // Extra helper copy removed; the display shows the countdown only.
         display = text("۰۵:۰۰", 43f, primary, true).apply {
             gravity = Gravity.CENTER; typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
             includeFontPadding = false; setPadding(0, dp(8), 0, dp(5))
@@ -88,9 +87,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         center.addView(status)
         ringFrame.addView(center, FrameLayout.LayoutParams(-1, -1))
         card.addView(ringFrame)
-        card.addView(text("انتخاب سریع", 14f, primary, true).apply {
-            gravity = Gravity.CENTER; setPadding(0, dp(8), 0, dp(12))
-        })
+        // Quick presets remain available without an extra section heading.
         val presetRows = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER }
         for (chunk in listOf(1, 5, 10, 15, 25, 30).chunked(3)) {
             val row = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER }
@@ -115,14 +112,9 @@ class CountdownTimerActivity : AppCompatActivity() {
             setPadding(dp(14), dp(12), dp(14), dp(10))
             layoutParams = LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(14) }
         }
-        pickerCard.addView(text("یا مدت دلخواهت را تنظیم کن", 14f, primary, true).apply {
-            gravity = Gravity.CENTER; setPadding(0, 0, 0, dp(6))
-        })
+        // Numeric selectors remain available without helper copy.
         val labels = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; layoutDirection = View.LAYOUT_DIRECTION_RTL }
-        labels.addView(text("ساعت", 12f, secondary).apply { gravity = Gravity.CENTER }, LinearLayout.LayoutParams(0, -2, 1f))
-        labels.addView(text("دقیقه", 12f, secondary).apply { gravity = Gravity.CENTER }, LinearLayout.LayoutParams(0, -2, 1f))
-        labels.addView(text("ثانیه", 12f, secondary).apply { gravity = Gravity.CENTER }, LinearLayout.LayoutParams(0, -2, 1f))
-        pickerCard.addView(labels)
+        // Extra Persian unit labels removed as requested.
         val pickers = LinearLayout(this).apply { orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; layoutDirection = View.LAYOUT_DIRECTION_RTL }
         hoursPicker = NumberPicker(this).apply {
             minValue = 0; maxValue = 100; value = 0; wrapSelectorWheel = false
