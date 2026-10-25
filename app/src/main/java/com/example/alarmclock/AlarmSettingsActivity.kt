@@ -12,8 +12,6 @@ import android.widget.TextView
 class AlarmSettingsActivity : BaseActivity() {
     private val prefs by lazy { getSharedPreferences("alarm_preferences", MODE_PRIVATE) }
     private lateinit var volumeLabel: TextView
-    private lateinit var snoozeCountLabel: TextView
-    private lateinit var snoozeMinutesLabel: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -66,47 +64,17 @@ class AlarmSettingsActivity : BaseActivity() {
         }
         root.addView(holidays)
         root.addView(label("این گزینه تعطیلات ثابت شمسی را پوشش می‌دهد؛ تعطیلات قمریِ متغیر در این نسخه لحاظ نشده‌اند."))
-        root.addView(title("تنظیمات چرت زدن"))
-        snoozeCountLabel = title("تعداد دفعات مجاز: " + prefs.getInt("snooze_count", 3), 15f)
-        root.addView(snoozeCountLabel)
-        root.addView(SeekBar(this).apply {
-            max = 10; progress = prefs.getInt("snooze_count", 3).coerceIn(0, 10)
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    snoozeCountLabel.text = "تعداد دفعات مجاز: " + progress
-                }
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
-            tag = "snooze_count"
-        })
-        snoozeMinutesLabel = title("مدت هر چرت: " + prefs.getInt("snooze_minutes", 10) + " دقیقه", 15f)
-        root.addView(snoozeMinutesLabel)
-        root.addView(SeekBar(this).apply {
-            max = 30; progress = (prefs.getInt("snooze_minutes", 10) - 1).coerceIn(0, 29)
-            setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
-                override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
-                    snoozeMinutesLabel.text = "مدت هر چرت: " + (progress + 1) + " دقیقه"
-                }
-                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
-                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
-            })
-            tag = "snooze_minutes"
-        })
+        root.addView(label("تنظیمات چرت زدن حالا برای هر هشدار جداگانه، داخل صفحهٔ ساخت/ویرایش هشدار قرار دارد."))
         root.addView(label("تنظیم بلندی صدا روی جریان صدای هشدار دستگاه اعمال می‌شود."))
         root.addView(Button(this).apply {
             text = "ذخیره تنظیمات"
             setOnClickListener {
                 val volume = root.findViewWithTag<SeekBar>("volume").progress
-                val snoozeCount = root.findViewWithTag<SeekBar>("snooze_count").progress
-                val snoozeMinutes = root.findViewWithTag<SeekBar>("snooze_minutes").progress + 1
                 prefs.edit()
                     .putInt("volume", volume)
                     .putBoolean("gradual_volume", gradual.isChecked)
                     .putBoolean("loud_escalation", loud.isChecked)
                     .putBoolean("disable_holidays", holidays.isChecked)
-                    .putInt("snooze_count", snoozeCount)
-                    .putInt("snooze_minutes", snoozeMinutes)
                     .apply()
                 finish()
             }

@@ -2,7 +2,7 @@ name: Build Hooshyar APK
 
 on:
   push:
-    branches: [main, feature/professional-alarm-clock, redesign/premium-clock-ui, feature/persian-premium-navigation, feature/hooshyar-name-math-rtl, fix/hooshyar-worldclock-timer-rgb-lockscreen, fix/hooshyar-alarm-lockscreen-worldclock-ui, fix/hooshyar-worldclock-crash-lockscreen-alarm, fix/world-clock-reliability-timer-unit-labels, fix/world-clock-snooze-lockscreen-reliability, feature/ui-persian-font-desk-clock]
+    branches: [main, feature/professional-alarm-clock, redesign/premium-clock-ui, feature/persian-premium-navigation, feature/hooshyar-name-math-rtl, fix/hooshyar-worldclock-timer-rgb-lockscreen, fix/hooshyar-alarm-lockscreen-worldclock-ui, fix/hooshyar-worldclock-crash-lockscreen-alarm, fix/world-clock-reliability-timer-unit-labels, fix/world-clock-snooze-lockscreen-reliability, feature/ui-persian-font-desk-clock, fix/wake-bugs]
   workflow_dispatch:
 
 permissions:
@@ -61,60 +61,18 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           cat > release-notes.md <<'NOTES'
-          ## تغییرات نسخه هوشیار (Hooshyar) — v1.0.62
-
-          ### تغییرات اصلی
-          - **نام برنامه:** نام فارسی برنامه «هوشیار» و نام انگلیسی آن **Hooshyar** یکدست‌سازی شد.
-          - **نمایش عبارت‌های ریاضی فارسی:** عبارت‌های ریاضی به ترتیب چپ‌به‌راست نمایش داده می‌شوند تا عملیاتی مانند ۱۰ − ۵ به‌درستی خوانده و تفسیر شوند.
-          - **هشدار روی صفحه قفل:** مسیر نمایش تمام‌صفحه هشدار و مدیریت اعلان هشدار به‌روزرسانی شد.
-          - **تعویق هشدار (Snooze):** مسیر تعویق و بازگشت به صفحه هشدار اصلاح شد.
-          - **رفتار پس از زنگ خوردن:** منطق حذف/مدیریت هشدار پس از زنگ خوردن تنظیم شد.
-          - **تایمر و کرنومتر:** اصلاحات کد Kotlin برای رفع مشکلات ساخت و بهبود سازگاری اعمال شد.
-
-          ### بررسی ساخت
-          - بررسی‌های Android lint و تست‌های واحد با موفقیت اجرا شدند.
-          - فایل APK از سورس شاخه main در همین اجرای موفق GitHub Actions ساخته شده است.
-
-          ### دانلود
-          فایل Hooshyar-v1.0.62.apk را از بخش Assets همین صفحه دریافت کنید.
-
-          > توجه: موفقیت ساخت و تست‌های خودکار به معنی آزمایش کامل روی همه مدل‌های گوشی نیست. عملکرد آلارم، صفحه قفل و نمایش ریاضی را پس از نصب روی دستگاه خود نیز بررسی کنید.
-          NOTES
-          sed -i 's/^          //' release-notes.md
-          gh release edit v1.0.62 --repo "${{ github.repository }}" --title "Hooshyar v1.0.62" --notes-file release-notes.md
-      - name: Publish Hooshyar APK to GitHub Release
-        if: "github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'release: publish Hooshyar')"
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          TAG="v1.0.${{ github.run_number }}"
-          cat > release-notes.md <<'NOTES'
           ## تغییرات نسخه هوشیار (Hooshyar)
 
-          ### رفع باگ ساعت جهانی
-          - دو شهر «آتلانتا» و «میامی» منطقهٔ زمانی معتبر نداشتند و ساعتشان اشتباه (GMT) نشان داده می‌شد؛ حالا به نیویورک متصل شده‌اند و شهرهای ذخیره‌شدهٔ قبلی خودکار اصلاح می‌شوند.
-          - تاریخ به شمسی (جلالی) با اعداد فارسی نمایش داده می‌شود و به زبان یا تقویم دستگاه وابسته نیست.
-          - ترتیب شهرها حفظ می‌شود و لیست شهرها کامل‌تر شد (۱۲۹ شهر).
-          - برای هر شهر، اختلاف زمان با ساعت شما و «امروز/فردا/دیروز» نمایش داده می‌شود.
-          - هر شهر یک ساعت عقربه‌ای زنده دارد و کارت روز/شب رنگ متفاوت می‌گیرد.
-          - مصرف پردازنده کمتر شد و به‌روزرسانی ساعت دقیقاً سر هر ثانیه انجام می‌شود.
+          ### رفع باگ‌ها
+          - **راه رفتن:** شمارش قدم دوباره کار می‌کند؛ اجازهٔ «فعالیت بدنی» درخواست می‌شود و اگر قدم‌شمار نبود از حرکت‌سنج استفاده می‌شود. پیشرفت روی صفحه دیده می‌شود.
+          - **الگو:** صفحهٔ کشیدن الگو از نو ساخته شد؛ با وصل کردن حداقل ۴ نقطه هشدار خاموش می‌شود.
+          - **دکمه‌های نوتیفیکیشن:** «خاموش» و «چرت» حالا درست کار می‌کنند.
+          - **صفحهٔ قفل:** اجازهٔ نمایش روی سایر برنامه‌ها اضافه شد و در صفحهٔ اصلی یک راهنمای تنظیمات (اعلان، نمایش تمام‌صفحه، نمایش روی برنامه‌ها) نشان داده می‌شود.
 
-          ### ظاهر و انیمیشن
-          - طراحی دوبارهٔ صفحهٔ اصلی با کارت گرادیانی، سلام بر اساس ساعت روز و تاریخ شمسی.
-          - نوار پایین جدید با آیکون‌های برداری به‌جای ایموجی.
-          - ورود تدریجی کارت‌ها، انتقال نرم بین صفحه‌ها، حس فشردن دکمه‌ها و انیمیشن آیکون صفحهٔ زنگ.
-          - حذف هشدار حالا دکمهٔ «بازگردانی» دارد.
+          ### تنظیمات چرت زدن
+          - حالا برای هر هشدار، داخل صفحهٔ ساخت/ویرایش هشدار است (تعداد دفعات و مدت هر چرت)؛ بخش جدا حذف شد.
 
-          ### فونت فارسی
-          - فونت وزیرمتن (Vazirmatn) در کل برنامه و داخل فایل برنامه گنجانده شده و بدون اینترنت هم کار می‌کند (مجوز OFL).
-
-          ### قابلیت جدید: ساعت رومیزی
-          - صفحهٔ تمام‌صفحهٔ ساعت کنار تخت یا روی میز، از دکمهٔ «رومیزی» در نوار پایین.
-          - لمس صفحه رنگ تم را عوض می‌کند، کشیدن بالا و پایین نور صفحه را تنظیم می‌کند.
-          - زمان هشدار بعدی زیر ساعت نشان داده می‌شود و صفحه خاموش نمی‌شود.
-          - ساعت هر دقیقه کمی جابه‌جا می‌شود تا روی صفحه‌های OLED اثر نسوزد.
-
-          > توجه: ساخت موفق به‌تنهایی تأیید آزمایش روی همهٔ دستگاه‌ها نیست؛ پس از نصب، صفحهٔ ساعت جهانی و ساعت رومیزی را روی گوشی خودتان بررسی کنید.
+          > توجه: روی بعضی گوشی‌ها (شیائومی، سامسونگ و...) باید در تنظیمات گوشی اجازهٔ «نمایش روی صفحهٔ قفل» را هم بدهید.
           NOTES
           sed -i 's/^          //' release-notes.md
           gh release create "$TAG" "Hooshyar-v1.0.${{ github.run_number }}.apk" \

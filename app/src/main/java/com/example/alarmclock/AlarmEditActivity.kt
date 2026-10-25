@@ -67,6 +67,20 @@ class AlarmEditActivity : BaseActivity() {
         binding.spinnerPatternSize.adapter = ArrayAdapter(
             this, android.R.layout.simple_spinner_dropdown_item, listOf("۳ × ۳", "۴ × ۴", "۵ × ۵")
         )
+        val snoozeLabels = {
+            val c = binding.seekSnoozeCount.progress
+            binding.textSnoozeCount.text = if (c == 0) "چرت زدن: غیرفعال" else "تعداد دفعات چرت زدن: " + PersianUtils.digits(c)
+            binding.textSnoozeMinutes.text = "مدت هر چرت: " + PersianUtils.digits(binding.seekSnoozeMinutes.progress + 1) + " دقیقه"
+            binding.seekSnoozeMinutes.isEnabled = c > 0
+        }
+        val snoozeListener = object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) = snoozeLabels()
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        }
+        binding.seekSnoozeCount.setOnSeekBarChangeListener(snoozeListener)
+        binding.seekSnoozeMinutes.setOnSeekBarChangeListener(snoozeListener)
+        snoozeLabels()
         binding.wakeModeGroup.setOnCheckedChangeListener { _, checkedId ->
             binding.mathDifficultyContainer.visibility =
                 if (checkedId == binding.wakeModeMath.id) View.VISIBLE else View.GONE
@@ -125,6 +139,8 @@ class AlarmEditActivity : BaseActivity() {
     }
 
     private fun fillFields(alarm: Alarm) {
+        binding.seekSnoozeCount.progress = SnoozeHelper.allowed(this, alarm.id)
+        binding.seekSnoozeMinutes.progress = SnoozeHelper.minutesFor(this, alarm.id) - 1
         binding.timePicker.hour = alarm.hour
         binding.timePicker.minute = alarm.minute
         binding.editNote.setText(alarm.label)
@@ -206,15 +222,18 @@ class AlarmEditActivity : BaseActivity() {
             typeMode = when (binding.spinnerTypeMode.selectedItemPosition) { 1 -> "MOTIVATIONAL"; 2 -> "CUSTOM"; else -> "RANDOM" },
             customPhrase = binding.editCustomPhrase.text.toString().trim(),
             touchTarget = binding.editTouchTarget.text.toString().toIntOrNull()?.coerceIn(1, 10000) ?: 30,
-            patternSize = binding.spinnerPatternSize.selectedItemPosition + 3
+            patternSize = binding.spinnerPatternSize.selectedItemPosition + 3,
+            snoozeCount = binding.seekSnoozeCount.progress,
+            snoozeMinutes = binding.seekSnoozeMinutes.progress + 1
         )
         if (existingAlarm != null) {
+            SnoozeHelper.saveConfig(this, alarm.id, alarm.snoozeCount, alarm.snoozeMinutes)
             AlarmScheduler.cancel(this, existingAlarm!!)
             viewModel.update(alarm)
             AlarmScheduler.schedule(this, alarm)
             finish()
         } else {
-            viewModel.insert(alarm) { inserted -> AlarmScheduler.schedule(this, inserted); finish() }
+            viewModel.insert(alarm) { inserted -> SnoozeHelper.saveConfig(this, inserted.id, inserted.snoozeCount, inserted.snoozeMinutes); AlarmScheduler.schedule(this, inserted); finish() }
         }
     }
 }

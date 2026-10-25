@@ -457,36 +457,35 @@ class AlarmRingActivity : AppCompatActivity() {
         challengeHandler.removeCallbacksAndMessages(null)
     }
 
+    private var overlay: ChallengeView? = null
+
+    private fun showOverlay(view: ChallengeView) {
+        if (overlay != null) return
+        view.setBackgroundColor(getColor(R.color.app_background))
+        view.isClickable = true
+        view.onSolved = { overlay = null; stopAndFinish() }
+        overlay = view
+        addContentView(view, android.view.ViewGroup.LayoutParams(
+            android.view.ViewGroup.LayoutParams.MATCH_PARENT, android.view.ViewGroup.LayoutParams.MATCH_PARENT))
+        view.start()
+    }
+
     private fun startWalkChallenge() {
-        val manager = getSystemService(SENSOR_SERVICE) as SensorManager
-        val sensor = manager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
-        if (sensor == null) {
-            AlertDialog.Builder(this).setTitle("شمارش قدم پشتیبانی نمی‌شود")
-                .setMessage("حسگر شمارش قدم در این گوشی در دسترس نیست. از روش تکان دادن یا لمس صفحه استفاده کن.")
-                .setPositiveButton("متوجه شدم", null).show()
+        val needsPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+            checkSelfPermission(android.Manifest.permission.ACTIVITY_RECOGNITION) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        if (needsPermission && !askedActivityPermission) {
+            askedActivityPermission = true
+            requestPermissions(arrayOf(android.Manifest.permission.ACTIVITY_RECOGNITION), 77)
             return
         }
-        stepBaseline = null
-        completedSteps = 0
-        showProgressChallenge("راه برو", "۰ از " + PersianUtils.digits(walkTarget) + " قدم")
-        sensorManager = manager
-        activeSensor = sensor
-        activeSensorListener = object : SensorEventListener {
-            override fun onSensorChanged(event: SensorEvent) {
-                val current = event.values.firstOrNull() ?: return
-                val baseline = stepBaseline
-                if (baseline == null) stepBaseline = current
-                else completedSteps = (current - baseline).toInt().coerceAtLeast(0)
-                challengeProgressView?.text = PersianUtils.digits(completedSteps) + " از " + PersianUtils.digits(walkTarget) + " قدم"
-                if (completedSteps >= walkTarget) {
-                    stopChallengeSensor()
-                    challengeDialog?.dismiss()
-                    stopAndFinish()
-                }
-            }
-            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
-        }
-        manager.registerListener(activeSensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+        showOverlay(WalkChallengeView(this, walkTarget))
+    }
+
+    private var askedActivityPermission = false
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 77) showOverlay(WalkChallengeView(this, walkTarget))
     }
 
     private fun startShakeChallenge() {
@@ -587,72 +586,7 @@ class AlarmRingActivity : AppCompatActivity() {
     }
 
     private fun startPatternChallenge() {
-        val patternView = PatternChallengeView(this, patternSize)
-        val dialog = AlertDialog.Builder(this).setTitle("الگو را بکش")
-            .setMessage("یک الگوی پیوسته با حداقل ۳ نقطه رسم کن.")
-            .setView(patternView).setCancelable(false)
-            .setPositiveButton("بررسی الگو", null).setNegativeButton("پاک کردن", null).create()
-        dialog.setOnShowListener {
-            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
-                if (patternView.selectedCount >= 3) { dialog.dismiss(); stopAndFinish() }
-                else android.widget.Toast.makeText(this, "الگو باید حداقل ۳ نقطه داشته باشد.", android.widget.Toast.LENGTH_SHORT).show()
-            }
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setOnClickListener { patternView.clearPattern() }
-        }
-        dialog.show()
-        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
-    }
-
-    private class PatternChallengeView(context: android.content.Context, private val grid: Int) : View(context) {
-        init {
-            val minSide = (320 * resources.displayMetrics.density).toInt()
-            minimumWidth = minSide
-            minimumHeight = minSide
-        }
-        private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
-        private val path = Path()
-        private val points = mutableListOf<Pair<Float, Float>>()
-        private val selected = linkedSetOf<Int>()
-        val selectedCount: Int get() = selected.size
-        override fun onDraw(canvas: Canvas) {
-            super.onDraw(canvas)
-            val side = minOf(width, height).toFloat() - 48f
-            val left = (width - side) / 2f
-            val top = (height - side) / 2f
-            points.clear()
-            for (r in 0 until grid) for (col in 0 until grid) {
-                points.add(left + side * col / (grid - 1) to top + side * r / (grid - 1))
-            }
-            paint.style = Paint.Style.STROKE; paint.strokeWidth = 8f; paint.color = context.getColor(R.color.accent_cyan)
-            canvas.drawPath(path, paint)
-            paint.style = Paint.Style.FILL
-            points.forEachIndexed { index, point ->
-                paint.color = if (index in selected) context.getColor(R.color.accent_violet) else context.getColor(R.color.text_secondary)
-                canvas.drawCircle(point.first, point.second, 12f, paint)
-            }
-        }
-        override fun onTouchEvent(event: android.view.MotionEvent): Boolean {
-            if (event.action == android.view.MotionEvent.ACTION_DOWN || event.action == android.view.MotionEvent.ACTION_MOVE) {
-                val side = minOf(width, height).toFloat() - 48f
-                val left = (width - side) / 2f; val top = (height - side) / 2f
-                var index = 0
-                var best = Float.MAX_VALUE
-                for (r in 0 until grid) for (col in 0 until grid) {
-                    val x = left + side * col / (grid - 1); val y = top + side * r / (grid - 1)
-                    val distance = kotlin.math.hypot(event.x - x, event.y - y)
-                    if (distance < best) { best = distance; index = r * grid + col }
-                }
-                if (best < side / (grid - 1) * 0.45f && selected.add(index)) {
-                    val pointX = left + side * (index % grid) / (grid - 1)
-                    val pointY = top + side * (index / grid) / (grid - 1)
-                    if (selected.size == 1) path.moveTo(pointX, pointY) else path.lineTo(pointX, pointY)
-                    invalidate()
-                }
-                return true
-            }
-            return event.action == android.view.MotionEvent.ACTION_UP
-        }
-        fun clearPattern() { selected.clear(); path.reset(); invalidate() }
+        showOverlay(FreePatternChallengeView(this, patternSize))
     }
 
     private fun startMemoryChallenge() {
@@ -705,6 +639,7 @@ class AlarmRingActivity : AppCompatActivity() {
     }
 
     private fun stopAndFinish() {
+        overlay?.stop()
         stopAlarmService()
         ringtone?.stop()
         vibrator?.cancel()

@@ -15,13 +15,13 @@ class AlarmActionReceiver : BroadcastReceiver() {
         when (intent.action) {
             ACTION_SNOOZE -> {
                 val prefs = context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
-                val maxSnoozes = prefs.getInt("snooze_count", 3).coerceIn(0, 10)
+                val maxSnoozes = SnoozeHelper.allowed(context, alarmId)
                 val usedSnoozes = prefs.getInt("snooze_used_" + alarmId, 0)
                 if (usedSnoozes >= maxSnoozes) {
                     android.widget.Toast.makeText(context, "تعداد دفعات چرت زدن تمام شده است.", android.widget.Toast.LENGTH_LONG).show()
                     return
                 }
-                runCatching { context.startService(stop) }
+                stopRinging(context, stop)
                 NotificationHelper.cancelNotification(context, alarmId)
                 SnoozeHelper.snooze(
                     context, alarmId, minutes = 10,
@@ -40,7 +40,7 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 )
             }
             ACTION_DISMISS -> {
-                runCatching { context.startService(stop) }
+                stopRinging(context, stop)
                 NotificationHelper.cancelNotification(context, alarmId)
                 if (intent.getBooleanExtra("delete_after_ringing", false) && alarmId != -1) {
                     val result = goAsync()
@@ -57,6 +57,11 @@ class AlarmActionReceiver : BroadcastReceiver() {
                 context.sendBroadcast(Intent(ACTION_CLOSE_RING).setPackage(context.packageName))
             }
         }
+    }
+
+    private fun stopRinging(context: Context, stop: Intent) {
+        runCatching { context.startService(stop) }
+        runCatching { context.stopService(Intent(context, AlarmRingingService::class.java)) }
     }
 
     companion object {

@@ -228,6 +228,53 @@
             <Spinner android:id="@+id/spinnerPatternSize" android:layout_width="match_parent" android:layout_height="52dp" android:background="@drawable/bg_input_field" />
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_surface_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="تنظیمات چرت زدن"
+                android:textColor="@color/text_primary"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textSnoozeCount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <SeekBar
+                android:id="@+id/seekSnoozeCount"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="10"
+                android:progress="3" />
+
+            <TextView
+                android:id="@+id/textSnoozeMinutes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <SeekBar
+                android:id="@+id/seekSnoozeMinutes"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="29"
+                android:progress="9" />
+        </LinearLayout>
+
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

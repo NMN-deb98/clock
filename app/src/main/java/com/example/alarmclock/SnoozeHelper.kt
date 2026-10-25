@@ -10,6 +10,24 @@ import java.util.Calendar
 
 object SnoozeHelper {
 
+    /** Per-alarm snooze settings are saved by the alarm edit screen. */
+    fun saveConfig(context: Context, alarmId: Int, count: Int, minutes: Int) {
+        context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE).edit()
+            .putInt("snooze_cfg_count_$alarmId", count.coerceIn(0, 10))
+            .putInt("snooze_cfg_min_$alarmId", minutes.coerceIn(1, 30))
+            .apply()
+    }
+
+    fun allowed(context: Context, alarmId: Int): Int {
+        val p = context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
+        return p.getInt("snooze_cfg_count_$alarmId", p.getInt("snooze_count", 3)).coerceIn(0, 10)
+    }
+
+    fun minutesFor(context: Context, alarmId: Int): Int {
+        val p = context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
+        return p.getInt("snooze_cfg_min_$alarmId", p.getInt("snooze_minutes", 10)).coerceIn(1, 30)
+    }
+
     fun snooze(
         context: Context,
         alarmId: Int,
@@ -29,13 +47,13 @@ object SnoozeHelper {
     ): Boolean {
         if (alarmId < 0 || minutes <= 0) return false
         val preferences = context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
-        val allowedSnoozes = preferences.getInt("snooze_count", 3).coerceIn(0, 10)
+        val allowedSnoozes = allowed(context, alarmId)
         val usedSnoozes = preferences.getInt("snooze_used_" + alarmId, 0)
         if (usedSnoozes >= allowedSnoozes) {
             android.widget.Toast.makeText(context, "تعداد دفعات چرت زدن تمام شده است.", android.widget.Toast.LENGTH_LONG).show()
             return false
         }
-        val selectedMinutes = preferences.getInt("snooze_minutes", minutes).coerceIn(1, 30)
+        val selectedMinutes = minutesFor(context, alarmId)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerTime = Calendar.getInstance().apply {
             add(Calendar.MINUTE, selectedMinutes)

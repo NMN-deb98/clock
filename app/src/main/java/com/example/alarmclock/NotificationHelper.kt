@@ -10,7 +10,7 @@ import android.os.Build
 import androidx.core.app.NotificationCompat
 
 object NotificationHelper {
-    private const val CHANNEL_ID = "alarm_channel_v3"
+    const val CHANNEL_ID = "alarm_channel_v3"
 
     fun createChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -55,7 +55,6 @@ object NotificationHelper {
         val body = label.ifBlank { context.getString(R.string.no_note) }
         fun actionIntent(action: String) = Intent(context, AlarmActionReceiver::class.java).apply {
             this.action = action
-            setPackage(context.packageName)
             putExtra("alarm_id", alarmId)
             putExtra("label", label)
             putExtra("ringtone_uri", ringtoneUri)
@@ -92,7 +91,7 @@ object NotificationHelper {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .addAction(0, dismissText, dismissPending)
-            .addAction(0, "۱۰ دقیقه بعد", snoozePending)
+            .addAction(0, PersianUtils.digits(SnoozeHelper.minutesFor(context, alarmId)) + " دقیقه بعد", snoozePending)
             .setFullScreenIntent(pending, true)
             .setContentIntent(pending)
             .setAutoCancel(false)

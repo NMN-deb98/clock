@@ -7,6 +7,7 @@ import android.app.NotificationManager
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.widget.TextView
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -170,16 +171,59 @@ class MainActivity : AppCompatActivity() {
         requestFullScreenAlarmAccessIfNeeded()
     }
 
+    private var readinessBanner: android.widget.LinearLayout? = null
+
+    /** Shows what still blocks the alarm screen from opening over the lock screen, with one tap to fix it. */
     private fun requestFullScreenAlarmAccessIfNeeded() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && !fullScreenSettingsLaunched) {
-            val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-            if (!manager.canUseFullScreenIntent()) {
-                fullScreenSettingsLaunched = true
-                startActivity(Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT).apply {
-                    data = Uri.parse("package:$packageName")
-                })
-            }
+        val column = binding.contentColumn
+        readinessBanner?.let { column.removeView(it) }
+        readinessBanner = null
+        val prefs = getSharedPreferences("alarm_preferences", MODE_PRIVATE)
+        if (System.currentTimeMillis() < prefs.getLong("readiness_later_until", 0L)) return
+        val issue = LockScreenReadiness.issues(this).firstOrNull() ?: return
+        val density = resources.displayMetrics.density
+        fun dp(v: Int) = (v * density).toInt()
+        val banner = android.widget.LinearLayout(this).apply {
+            orientation = android.widget.LinearLayout.VERTICAL
+            background = UiFx.rounded(this@MainActivity, getColor(R.color.surface_elevated), 20, getColor(R.color.accent_amber))
+            setPadding(dp(16), dp(14), dp(16), dp(10))
+            addView(TextView(this@MainActivity).apply {
+                text = "⚠  " + issue.title
+                textSize = 15f
+                setTextColor(getColor(R.color.accent_amber))
+                typeface = UiFx.font(this@MainActivity, 700)
+            })
+            addView(TextView(this@MainActivity).apply {
+                text = issue.body
+                textSize = 13f
+                setTextColor(getColor(R.color.text_secondary))
+                setPadding(0, dp(6), 0, dp(10))
+            })
+            val row = android.widget.LinearLayout(this@MainActivity).apply { orientation = android.widget.LinearLayout.HORIZONTAL }
+            row.addView(TextView(this@MainActivity).apply {
+                text = "باز کردن تنظیمات"
+                textSize = 14f
+                setTextColor(getColor(R.color.app_background))
+                background = UiFx.rounded(this@MainActivity, getColor(R.color.accent_cyan), 14)
+                setPadding(dp(16), dp(10), dp(16), dp(10))
+                setOnClickListener { runCatching { startActivity(LockScreenReadiness.settingsIntent(this@MainActivity, issue)) } }
+            })
+            row.addView(TextView(this@MainActivity).apply {
+                text = "بعداً"
+                textSize = 14f
+                setTextColor(getColor(R.color.text_secondary))
+                setPadding(dp(18), dp(10), dp(18), dp(10))
+                setOnClickListener {
+                    prefs.edit().putLong("readiness_later_until", System.currentTimeMillis() + 3L * 24 * 3600 * 1000).apply()
+                    requestFullScreenAlarmAccessIfNeeded()
+                }
+            })
+            addView(row)
         }
+        column.addView(banner, 0, android.widget.LinearLayout.LayoutParams(-1, -2).apply {
+            setMargins(0, dp(8), 0, dp(8))
+        })
+        readinessBanner = banner
     }
 
     override fun onPause() {

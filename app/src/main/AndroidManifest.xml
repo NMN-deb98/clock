@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.USE_FULL_SCREEN_INTENT" />
+    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
+    <uses-permission android:name="android.permission.ACTIVITY_RECOGNITION" />
 
     <application
         android:allowBackup="true"
@@ -26,7 +28,7 @@
         </activity>
         <activity android:name=".AlarmEditActivity" android:exported="false" android:label="@string/edit_alarm" />
         <activity android:name=".AlarmSettingsActivity" android:exported="false" android:label="تنظیمات هشدار" />
-        <activity android:name=".AlarmRingActivity" android:exported="false" android:theme="@style/Theme.AlarmApp" android:showWhenLocked="true" android:turnScreenOn="true" android:excludeFromRecents="true" android:launchMode="singleTop" />
+        <activity android:name=".AlarmRingActivity" android:exported="false" android:theme="@style/Theme.AlarmApp" android:showWhenLocked="true" android:turnScreenOn="true" android:excludeFromRecents="true" android:launchMode="singleTop" android:screenOrientation="portrait" android:configChanges="orientation|screenSize|keyboardHidden" android:windowSoftInputMode="adjustResize" />
         <activity android:name=".WorldClockActivity" android:exported="false" />
         <activity android:name=".StopwatchActivity" android:exported="false" />
         <activity android:name=".CountdownTimerActivity" android:exported="false" />
