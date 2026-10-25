@@ -19,7 +19,10 @@ class AlarmReceiver : BroadcastReceiver() {
         // Start the ringing foreground service directly from the alarm broadcast.
         // Do not make the alarm's audible start wait for a Room database read.
         val hasSnapshot = intent.hasExtra("alarm_enabled_snapshot")
-        if (hasSnapshot && intent.getBooleanExtra("alarm_enabled_snapshot", false)) {
+        val preferences = context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
+        val skipForHoliday = preferences.getBoolean("disable_holidays", false) &&
+            PersianUtils.isIranianFixedHoliday()
+        if (hasSnapshot && intent.getBooleanExtra("alarm_enabled_snapshot", false) && !skipForHoliday) {
             startRingingService(context, intent, alarmId)
         }
 
@@ -29,7 +32,7 @@ class AlarmReceiver : BroadcastReceiver() {
                 val alarm = AlarmDatabase.getInstance(context).alarmDao().getById(alarmId)
                 if (alarm != null && alarm.enabled) {
                     // Older PendingIntents may not contain the snapshot extras.
-                    if (!hasSnapshot) {
+                    if (!hasSnapshot && !skipForHoliday) {
                         val serviceIntent = Intent(context, AlarmRingingService::class.java).apply {
                             putExtra("alarm_id", alarm.id)
                             putExtra("label", alarm.label)
