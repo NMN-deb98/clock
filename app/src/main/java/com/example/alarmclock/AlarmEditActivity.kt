@@ -58,9 +58,33 @@ class AlarmEditActivity : BaseActivity() {
         binding.spinnerMathDifficulty.adapter = ArrayAdapter(
             this, android.R.layout.simple_spinner_dropdown_item, listOf("آسان", "متوسط", "سخت")
         )
+        binding.spinnerShakeDifficulty.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_dropdown_item, listOf("آسان", "سخت", "خیلی سخت")
+        )
+        binding.spinnerTypeMode.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_dropdown_item, listOf("حروف تصادفی", "جملات انگیزشی", "جمله دلخواه")
+        )
+        binding.spinnerPatternSize.adapter = ArrayAdapter(
+            this, android.R.layout.simple_spinner_dropdown_item, listOf("۳ × ۳", "۴ × ۴", "۵ × ۵")
+        )
         binding.wakeModeGroup.setOnCheckedChangeListener { _, checkedId ->
             binding.mathDifficultyContainer.visibility =
                 if (checkedId == binding.wakeModeMath.id) View.VISIBLE else View.GONE
+            binding.otherChallengeContainer.visibility =
+                if (checkedId in listOf(binding.wakeModeWalk.id, binding.wakeModeShake.id,
+                    binding.wakeModeType.id, binding.wakeModeTouch.id, binding.wakeModePattern.id)) View.VISIBLE else View.GONE
+            binding.editWalkTarget.visibility = if (checkedId == binding.wakeModeWalk.id) View.VISIBLE else View.GONE
+            binding.editTouchTarget.visibility = if (checkedId == binding.wakeModeTouch.id) View.VISIBLE else View.GONE
+            binding.spinnerShakeDifficulty.visibility = if (checkedId == binding.wakeModeShake.id) View.VISIBLE else View.GONE
+            binding.spinnerTypeMode.visibility = if (checkedId == binding.wakeModeType.id) View.VISIBLE else View.GONE
+            binding.editCustomPhrase.visibility = if (checkedId == binding.wakeModeType.id && binding.spinnerTypeMode.selectedItemPosition == 2) View.VISIBLE else View.GONE
+            binding.spinnerPatternSize.visibility = if (checkedId == binding.wakeModePattern.id) View.VISIBLE else View.GONE
+        }
+        binding.spinnerTypeMode.onItemSelectedListener = object : android.widget.AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: android.widget.AdapterView<*>?, view: View?, position: Int, id: Long) {
+                binding.editCustomPhrase.visibility = if (binding.wakeModeType.isChecked && position == 2) View.VISIBLE else View.GONE
+            }
+            override fun onNothingSelected(parent: android.widget.AdapterView<*>?) {}
         }
 
         if (alarmId != -1) {
@@ -109,8 +133,21 @@ class AlarmEditActivity : BaseActivity() {
         when (alarm.wakeMode) {
             "MATH" -> binding.wakeModeMath.isChecked = true
             "PHOTO" -> binding.wakeModePhoto.isChecked = true
+            "WALK" -> binding.wakeModeWalk.isChecked = true
+            "SHAKE" -> binding.wakeModeShake.isChecked = true
+            "TYPE" -> binding.wakeModeType.isChecked = true
+            "TOUCH" -> binding.wakeModeTouch.isChecked = true
+            "PATTERN" -> binding.wakeModePattern.isChecked = true
+            "MEMORY" -> binding.wakeModeMemory.isChecked = true
+            "HOLD" -> binding.wakeModeHold.isChecked = true
             else -> binding.wakeModeNone.isChecked = true
         }
+        binding.editWalkTarget.setText(alarm.walkTarget.toString())
+        binding.editTouchTarget.setText(alarm.touchTarget.toString())
+        binding.spinnerShakeDifficulty.setSelection(when (alarm.shakeDifficulty) { "EASY" -> 0; "VERY_HARD" -> 2; else -> 1 })
+        binding.spinnerTypeMode.setSelection(when (alarm.typeMode) { "MOTIVATIONAL" -> 1; "CUSTOM" -> 2; else -> 0 })
+        binding.editCustomPhrase.setText(alarm.customPhrase)
+        binding.spinnerPatternSize.setSelection((alarm.patternSize - 3).coerceIn(0, 2))
         binding.spinnerMathDifficulty.setSelection(when (alarm.mathDifficulty) {
             "EASY" -> 0; "HARD" -> 2; else -> 1
         })
@@ -146,6 +183,13 @@ class AlarmEditActivity : BaseActivity() {
         val wakeMode = when (binding.wakeModeGroup.checkedRadioButtonId) {
             binding.wakeModeMath.id -> "MATH"
             binding.wakeModePhoto.id -> "PHOTO"
+            binding.wakeModeWalk.id -> "WALK"
+            binding.wakeModeShake.id -> "SHAKE"
+            binding.wakeModeType.id -> "TYPE"
+            binding.wakeModeTouch.id -> "TOUCH"
+            binding.wakeModePattern.id -> "PATTERN"
+            binding.wakeModeMemory.id -> "MEMORY"
+            binding.wakeModeHold.id -> "HOLD"
             else -> "NONE"
         }
         val mathDifficulty = when (binding.spinnerMathDifficulty.selectedItemPosition) {
@@ -156,7 +200,13 @@ class AlarmEditActivity : BaseActivity() {
             ringtoneUri = selectedRingtoneUri, ringtoneName = selectedRingtoneName,
             vibrate = binding.checkVibrate.isChecked, enabled = true,
             wakeMode = wakeMode, mathDifficulty = mathDifficulty,
-            deleteAfterRinging = binding.checkDeleteAfterRinging.isChecked
+            deleteAfterRinging = binding.checkDeleteAfterRinging.isChecked,
+            walkTarget = binding.editWalkTarget.text.toString().toIntOrNull()?.coerceIn(1, 10000) ?: 40,
+            shakeDifficulty = when (binding.spinnerShakeDifficulty.selectedItemPosition) { 0 -> "EASY"; 2 -> "VERY_HARD"; else -> "HARD" },
+            typeMode = when (binding.spinnerTypeMode.selectedItemPosition) { 1 -> "MOTIVATIONAL"; 2 -> "CUSTOM"; else -> "RANDOM" },
+            customPhrase = binding.editCustomPhrase.text.toString().trim(),
+            touchTarget = binding.editTouchTarget.text.toString().toIntOrNull()?.coerceIn(1, 10000) ?: 30,
+            patternSize = binding.spinnerPatternSize.selectedItemPosition + 3
         )
         if (existingAlarm != null) {
             AlarmScheduler.cancel(this, existingAlarm!!)
