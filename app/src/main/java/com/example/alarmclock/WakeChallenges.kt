@@ -228,8 +228,8 @@ class ShakeChallengeView(context: Context, level: String) : ChallengeView(contex
 
     init {
         when (level) {
-            AlarmOptions.SHAKE_EXTREME -> { needed = 50; threshold = 27f; gapMs = 200L; levelName = "خیلی سخت" }
-            AlarmOptions.SHAKE_HARD -> { needed = 30; threshold = 20f; gapMs = 220L; levelName = "سخت" }
+            "VERY_HARD" -> { needed = 50; threshold = 27f; gapMs = 200L; levelName = "خیلی سخت" }
+            "HARD" -> { needed = 30; threshold = 20f; gapMs = 220L; levelName = "سخت" }
             else -> { needed = 15; threshold = 14f; gapMs = 260L; levelName = "آسان" }
         }
         addTitle("گوشی را تکان بده", "درجهٔ سختی: $levelName  •  ${PersianUtils.digits(needed)} تکان قوی")
@@ -312,9 +312,9 @@ class TypingChallengeView(
         content.addView(scroll, LinearLayout.LayoutParams(-1, -1))
 
         val (title, subtitle) = when (mode) {
-            AlarmOptions.TYPING_RANDOM_EN -> "حروف را تایپ کن" to "این حروف و اعداد انگلیسی را دقیقاً همین‌طور بنویس"
-            AlarmOptions.TYPING_RANDOM_FA -> "حروف را تایپ کن" to "این حروف فارسی را دقیقاً همین‌طور بنویس"
-            AlarmOptions.TYPING_CUSTOM -> "جملهٔ خودت را تایپ کن" to "همان جمله‌ای که خودت برای بیدار شدن انتخاب کردی"
+            "RANDOM_EN" -> "حروف را تایپ کن" to "این حروف و اعداد انگلیسی را دقیقاً همین‌طور بنویس"
+            "RANDOM" -> "حروف را تایپ کن" to "این حروف فارسی را دقیقاً همین‌طور بنویس"
+            "CUSTOM" -> "جملهٔ خودت را تایپ کن" to "همان جمله‌ای که خودت برای بیدار شدن انتخاب کردی"
             else -> "جملهٔ انگیزشی را تایپ کن" to "این جمله را بدون تغییر بنویس تا زنگ خاموش شود"
         }
         column.addView(label(title, 24f, primary, true))
@@ -327,7 +327,7 @@ class TypingChallengeView(
             background = UiFx.rounded(context, surface, 20, border)
             setTextIsSelectable(false)
             isLongClickable = false
-            if (mode == AlarmOptions.TYPING_RANDOM_EN) textDirection = View.TEXT_DIRECTION_LTR
+            if (mode == "RANDOM_EN") textDirection = View.TEXT_DIRECTION_LTR
         }
         column.addView(targetView, LinearLayout.LayoutParams(-1, -2))
 
@@ -342,7 +342,7 @@ class TypingChallengeView(
             inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS
             background = UiFx.rounded(context, elevated, 16, border)
             setPadding(dp(14), dp(14), dp(14), dp(14))
-            if (mode == AlarmOptions.TYPING_RANDOM_EN) textDirection = View.TEXT_DIRECTION_LTR
+            if (mode == "RANDOM_EN") textDirection = View.TEXT_DIRECTION_LTR
             addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) = Unit
                 override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) = Unit
@@ -352,7 +352,7 @@ class TypingChallengeView(
         column.addView(input, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(18) })
         column.addView(status, LinearLayout.LayoutParams(-1, -2).apply { topMargin = dp(10) })
 
-        if (mode != AlarmOptions.TYPING_CUSTOM) {
+        if (mode != "CUSTOM") {
             column.addView(
                 label("↻  متن دیگر", 14f, violet, true).apply {
                     setPadding(dp(18), dp(12), dp(18), dp(12))
@@ -379,12 +379,12 @@ class TypingChallengeView(
 
     private fun newTarget() {
         target = when (mode) {
-            AlarmOptions.TYPING_RANDOM_EN -> randomLetters("ABCDEFGHJKMNPQRSTUVWXYZ23456789", 6)
-            AlarmOptions.TYPING_RANDOM_FA -> randomLetters("ابپتجچحخدرزسشصطعفقکگلمنوهی", 6)
-            AlarmOptions.TYPING_CUSTOM -> custom.trim()
+            "RANDOM_EN" -> randomLetters("ABCDEFGHJKMNPQRSTUVWXYZ23456789", 6)
+            "RANDOM" -> randomLetters("ابپتجچحخدرزسشصطعفقکگلمنوهی", 6)
+            "CUSTOM" -> custom.trim()
             else -> MotivationalSentences.all.random()
         }
-        targetView.text = if (mode == AlarmOptions.TYPING_RANDOM_EN || mode == AlarmOptions.TYPING_RANDOM_FA)
+        targetView.text = if (mode == "RANDOM_EN" || mode == "RANDOM")
             target.toCharArray().joinToString("   ") else target
         input.setText("")
         status.text = ""
