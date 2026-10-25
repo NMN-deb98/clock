@@ -61,6 +61,19 @@ class AlarmRingActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        // Configure the lock-screen window before the content is attached.
+        // This is important when launched from a full-screen alarm notification.
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            setShowWhenLocked(true)
+            setTurnScreenOn(true)
+        } else {
+            @Suppress("DEPRECATION")
+            window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or
+                WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON or
+                WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+        }
+        @Suppress("DEPRECATION")
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
         binding = ActivityAlarmRingBinding.inflate(layoutInflater)
         setContentView(binding.root)
         window.decorView.layoutDirection = View.LAYOUT_DIRECTION_RTL
