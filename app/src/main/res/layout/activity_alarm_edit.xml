@@ -174,6 +174,13 @@
                 android:minHeight="48dp"
                 android:text="گرفتن ۲ عکس از سوژه‌های تصادفی"
                 android:textColor="@color/text_primary" />
+            <RadioButton android:id="@+id/wakeModeWalk" android:layout_width="match_parent" android:layout_height="wrap_content" android:buttonTint="@color/accent_cyan" android:minHeight="48dp" android:text="راه رفتن با شمارش قدم" android:textColor="@color/text_primary" />
+            <RadioButton android:id="@+id/wakeModeShake" android:layout_width="match_parent" android:layout_height="wrap_content" android:buttonTint="@color/accent_cyan" android:minHeight="48dp" android:text="تکان دادن گوشی" android:textColor="@color/text_primary" />
+            <RadioButton android:id="@+id/wakeModeType" android:layout_width="match_parent" android:layout_height="wrap_content" android:buttonTint="@color/accent_cyan" android:minHeight="48dp" android:text="تایپ کردن" android:textColor="@color/text_primary" />
+            <RadioButton android:id="@+id/wakeModeTouch" android:layout_width="match_parent" android:layout_height="wrap_content" android:buttonTint="@color/accent_cyan" android:minHeight="48dp" android:text="لمس مکرر صفحه" android:textColor="@color/text_primary" />
+            <RadioButton android:id="@+id/wakeModePattern" android:layout_width="match_parent" android:layout_height="wrap_content" android:buttonTint="@color/accent_cyan" android:minHeight="48dp" android:text="کشیدن الگو" android:textColor="@color/text_primary" />
+            <RadioButton android:id="@+id/wakeModeMemory" android:layout_width="match_parent" android:layout_height="wrap_content" android:buttonTint="@color/accent_cyan" android:minHeight="48dp" android:text="چالش حافظه (اضافی)" android:textColor="@color/text_primary" />
+            <RadioButton android:id="@+id/wakeModeHold" android:layout_width="match_parent" android:layout_height="wrap_content" android:buttonTint="@color/accent_cyan" android:minHeight="48dp" android:text="نگه داشتن دکمه برای بیداری (اضافی)" android:textColor="@color/text_primary" />
         </RadioGroup>
 
         <LinearLayout
@@ -201,6 +208,24 @@
                 android:layout_marginTop="6dp"
                 android:background="@drawable/bg_input_field"
                 android:paddingHorizontal="12dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/otherChallengeContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_surface_card"
+            android:orientation="vertical"
+            android:padding="14dp"
+            android:visibility="gone">
+            <TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تنظیمات چالش" android:textColor="@color/text_primary" android:textStyle="bold" />
+            <EditText android:id="@+id/editWalkTarget" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="تعداد قدم‌ها (مثلاً ۴۰)" android:inputType="number" android:text="40" android:textColor="@color/text_primary" />
+            <EditText android:id="@+id/editTouchTarget" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="تعداد لمس صفحه (مثلاً ۳۰)" android:inputType="number" android:text="30" android:textColor="@color/text_primary" />
+            <Spinner android:id="@+id/spinnerShakeDifficulty" android:layout_width="match_parent" android:layout_height="52dp" android:background="@drawable/bg_input_field" />
+            <Spinner android:id="@+id/spinnerTypeMode" android:layout_width="match_parent" android:layout_height="52dp" android:background="@drawable/bg_input_field" />
+            <EditText android:id="@+id/editCustomPhrase" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="جمله دلخواه برای تایپ" android:inputType="textMultiLine" android:textColor="@color/text_primary" />
+            <Spinner android:id="@+id/spinnerPatternSize" android:layout_width="match_parent" android:layout_height="52dp" android:background="@drawable/bg_input_field" />
         </LinearLayout>
 
         <TextView
