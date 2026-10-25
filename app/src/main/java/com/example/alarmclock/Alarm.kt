@@ -20,7 +20,16 @@ data class Alarm(
     var enabled: Boolean = true,
     var wakeMode: String = "NONE",
     var mathDifficulty: String = "MEDIUM",
-    var deleteAfterRinging: Boolean = false
+    var deleteAfterRinging: Boolean = false,
+    var walkTarget: Int = 40,
+    var shakeDifficulty: String = "MEDIUM",
+    var typeMode: String = "RANDOM",
+    var customPhrase: String = "",
+    var touchTarget: Int = 30,
+    var patternSize: Int = 3,
+    var memoryDifficulty: String = "MEDIUM",
+    var snoozeCount: Int = 3,
+    var snoozeMinutes: Int = 10
 ) {
     fun dayList(): List<Int> =
         if (days.isBlank()) emptyList() else days.split(",").map { it.trim().toInt() }
