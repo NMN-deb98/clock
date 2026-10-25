@@ -83,7 +83,7 @@ jobs:
           sed -i 's/^          //' release-notes.md
           gh release edit v1.0.62 --repo "${{ github.repository }}" --title "Hooshyar v1.0.62" --notes-file release-notes.md
       - name: Publish Hooshyar APK to GitHub Release
-        if: "github.ref == 'refs/heads/main' && !contains(github.event.head_commit.message, 'docs(release): document Hooshyar changes')"
+        if: "github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'release: publish Hooshyar')"
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
