@@ -14,6 +14,13 @@ class AlarmActionReceiver : BroadcastReceiver() {
         val stop = Intent(context, AlarmRingingService::class.java).apply { action = AlarmRingingService.ACTION_STOP }
         when (intent.action) {
             ACTION_SNOOZE -> {
+                val prefs = context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
+                val maxSnoozes = prefs.getInt("snooze_count", 3).coerceIn(0, 10)
+                val usedSnoozes = prefs.getInt("snooze_used_" + alarmId, 0)
+                if (usedSnoozes >= maxSnoozes) {
+                    android.widget.Toast.makeText(context, "تعداد دفعات چرت زدن تمام شده است.", android.widget.Toast.LENGTH_LONG).show()
+                    return
+                }
                 runCatching { context.startService(stop) }
                 NotificationHelper.cancelNotification(context, alarmId)
                 SnoozeHelper.snooze(
