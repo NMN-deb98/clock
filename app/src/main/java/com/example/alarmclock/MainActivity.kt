@@ -1,6 +1,7 @@
 package com.example.alarmclock
 
 import android.Manifest
+import android.animation.ObjectAnimator
 import android.app.AlarmManager
 import android.app.NotificationManager
 import android.content.Intent
@@ -17,7 +18,9 @@ import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.alarmclock.databinding.ActivityMainBinding
-import java.util.Locale
+import com.google.android.material.snackbar.Snackbar
+import java.util.Calendar
+import java.util.TimeZone
 import java.util.concurrent.TimeUnit
 
 class MainActivity : AppCompatActivity() {
@@ -26,6 +29,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var adapter: AlarmAdapter
     private var latestAlarms: List<Alarm> = emptyList()
     private var fullScreenSettingsLaunched = false
+    private var layoutAnimationPlayed = false
+    private var heroPulse: ObjectAnimator? = null
     private val countdownHandler = Handler(Looper.getMainLooper())
     private val countdownTick = object : Runnable {
         override fun run() {
@@ -47,28 +52,81 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this)[AlarmViewModel::class.java]
         adapter = AlarmAdapter(
             onItemClick = { alarm ->
-                startActivity(Intent(this, AlarmEditActivity::class.java).putExtra("alarm_id", alarm.id))
+                open(AlarmEditActivity::class.java) { it.putExtra("alarm_id", alarm.id) }
             },
             onToggle = { alarm, enabled ->
                 val updated = alarm.copy(enabled = enabled)
                 viewModel.update(updated)
                 if (enabled) AlarmScheduler.schedule(this, updated) else AlarmScheduler.cancel(this, updated)
             },
-            onDelete = { alarm -> AlarmScheduler.cancel(this, alarm); viewModel.delete(alarm) }
+            onDelete = { alarm ->
+                AlarmScheduler.cancel(this, alarm)
+                viewModel.delete(alarm)
+                showUndo(alarm)
+            }
         )
         binding.recyclerAlarms.layoutManager = LinearLayoutManager(this)
         binding.recyclerAlarms.adapter = adapter
         viewModel.allAlarms.observe(this) { alarms ->
             latestAlarms = alarms.orEmpty()
-            adapter.submitList(latestAlarms)
-            binding.emptyView.visibility = if (latestAlarms.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+            adapter.submitList(latestAlarms) {
+                if (!layoutAnimationPlayed && latestAlarms.isNotEmpty()) {
+                    layoutAnimationPlayed = true
+                    binding.recyclerAlarms.scheduleLayoutAnimation()
+                }
+            }
+            binding.emptyView.visibility =
+                if (latestAlarms.isEmpty()) android.view.View.VISIBLE else android.view.View.GONE
+            binding.textAlarmCount.text =
+                if (latestAlarms.isEmpty()) "" else PersianUtils.digits(latestAlarms.size) + " هشدار"
             updateNextAlarm()
         }
-        binding.fabAdd.setOnClickListener { startActivity(Intent(this, AlarmEditActivity::class.java)) }
+        binding.fabAdd.setOnClickListener { open(AlarmEditActivity::class.java) }
         binding.buttonHome.setOnClickListener { binding.recyclerAlarms.smoothScrollToPosition(0) }
-        binding.buttonWorldClock.setOnClickListener { startActivity(Intent(this, WorldClockActivity::class.java)) }
-        binding.buttonStopwatch.setOnClickListener { startActivity(Intent(this, StopwatchActivity::class.java)) }
-        binding.buttonTimer.setOnClickListener { startActivity(Intent(this, CountdownTimerActivity::class.java)) }
+        binding.buttonWorldClock.setOnClickListener { open(WorldClockActivity::class.java) }
+        binding.buttonStopwatch.setOnClickListener { open(StopwatchActivity::class.java) }
+        binding.buttonTimer.setOnClickListener { open(CountdownTimerActivity::class.java) }
+        binding.buttonDeskClock.setOnClickListener { open(DeskClockActivity::class.java) }
+
+        listOf(
+            binding.buttonHome, binding.buttonWorldClock, binding.buttonStopwatch,
+            binding.buttonTimer, binding.buttonDeskClock
+        ).forEach { UiFx.pressable(it, 0.9f) }
+        UiFx.pressable(binding.fabAdd, 0.94f)
+
+        refreshHeader()
+        if (savedInstanceState == null) {
+            UiFx.enter(binding.headerBlock, 0L, 14f)
+            UiFx.enter(binding.heroCard, 110L)
+        }
+    }
+
+    private fun open(target: Class<*>, extra: ((Intent) -> Unit)? = null) {
+        val intent = Intent(this, target)
+        extra?.invoke(intent)
+        startActivity(intent)
+        @Suppress("DEPRECATION")
+        overridePendingTransition(R.anim.screen_in, R.anim.screen_out)
+    }
+
+    private fun showUndo(alarm: Alarm) {
+        Snackbar.make(binding.root, "هشدار حذف شد", Snackbar.LENGTH_LONG)
+            .setAnchorView(binding.bottomNavigation)
+            .setBackgroundTint(getColor(R.color.surface_elevated))
+            .setTextColor(getColor(R.color.text_primary))
+            .setActionTextColor(getColor(R.color.accent_cyan))
+            .setAction("بازگردانی") {
+                viewModel.insert(alarm) { inserted ->
+                    if (inserted.enabled) AlarmScheduler.schedule(this, inserted)
+                }
+            }
+            .show()
+    }
+
+    private fun refreshHeader() {
+        val cal = PersianUtils.newCalendar(TimeZone.getDefault(), System.currentTimeMillis())
+        binding.textGreeting.text = PersianUtils.greeting(cal.get(Calendar.HOUR_OF_DAY))
+        binding.textTodayDate.text = PersianUtils.dateText(cal)
     }
 
     private fun updateNextAlarm() {
@@ -87,25 +145,23 @@ class MainActivity : AppCompatActivity() {
         val minutes = TimeUnit.MILLISECONDS.toMinutes(remaining) % 60
         val seconds = TimeUnit.MILLISECONDS.toSeconds(remaining) % 60
         val parts = mutableListOf<String>()
-        if (days > 0) parts.add("${persianNumber(days)} روز")
-        if (hours > 0 || days > 0) parts.add("${persianNumber(hours)} ساعت")
-        if (minutes > 0 || hours > 0 || days > 0) parts.add("${persianNumber(minutes)} دقیقه")
-        parts.add("${persianNumber(seconds)} ثانیه")
+        if (days > 0) parts.add("${PersianUtils.digits(days)} روز")
+        if (hours > 0 || days > 0) parts.add("${PersianUtils.digits(hours)} ساعت")
+        if (minutes > 0 || hours > 0 || days > 0) parts.add("${PersianUtils.digits(minutes)} دقیقه")
+        parts.add("${PersianUtils.digits(seconds)} ثانیه")
         binding.textNextAlarmCountdown.text = "تا زنگ بعدی: " + parts.joinToString(" و ")
 
-        val clock = String.format(Locale("fa", "IR"), "%02d:%02d", next.first.hour, next.first.minute)
+        val clock = PersianUtils.two(next.first.hour) + ":" + PersianUtils.two(next.first.minute)
         binding.textNextAlarmTime.text = "${next.first.label.ifBlank { "هشدار بعدی" }} • ساعت $clock"
     }
 
-    private fun persianNumber(number: Long): String =
-        number.toString().map { ch ->
-            if (ch in '0'..'9') ('۰'.code + (ch - '0')).toChar() else ch
-        }.joinToString("")
-
     override fun onResume() {
         super.onResume()
+        refreshHeader()
         countdownHandler.removeCallbacks(countdownTick)
         countdownHandler.post(countdownTick)
+        heroPulse?.cancel()
+        heroPulse = UiFx.breathe(binding.heroIconFrame, 1.08f, 1800L)
         requestFullScreenAlarmAccessIfNeeded()
     }
 
@@ -120,13 +176,21 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    override fun onPause() { countdownHandler.removeCallbacks(countdownTick); super.onPause() }
+
+    override fun onPause() {
+        countdownHandler.removeCallbacks(countdownTick)
+        heroPulse?.cancel()
+        binding.heroIconFrame.scaleX = 1f
+        binding.heroIconFrame.scaleY = 1f
+        super.onPause()
+    }
 
     private fun askNotificationPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
             ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED
         ) notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
+
     private fun askExactAlarmPermissionIfNeeded() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             val manager = getSystemService(ALARM_SERVICE) as AlarmManager

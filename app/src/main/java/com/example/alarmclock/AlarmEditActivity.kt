@@ -15,7 +15,7 @@ import com.example.alarmclock.databinding.ActivityAlarmEditBinding
 import kotlinx.coroutines.launch
 import java.util.Calendar
 
-class AlarmEditActivity : AppCompatActivity() {
+class AlarmEditActivity : BaseActivity() {
     private lateinit var binding: ActivityAlarmEditBinding
     private lateinit var viewModel: AlarmViewModel
     private var alarmId: Int = -1

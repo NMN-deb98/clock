@@ -15,4 +15,12 @@
     <color name="text_secondary">#A9B6CC</color>
     <color name="danger">#FF718B</color>
     <color name="success">#5FE0B5</color>
+    <color name="accent_amber">#FFC46B</color>
+    <color name="accent_rose">#FF8FB1</color>
+    <color name="card_day_start">#16404E</color>
+    <color name="card_day_end">#121B2D</color>
+    <color name="card_night_start">#2A2563</color>
+    <color name="card_night_end">#121B2D</color>
+    <color name="hero_start">#2C2A66</color>
+    <color name="hero_end">#0F3A47</color>
 </resources>

@@ -29,6 +29,7 @@
         <activity android:name=".WorldClockActivity" android:exported="false" />
         <activity android:name=".StopwatchActivity" android:exported="false" />
         <activity android:name=".CountdownTimerActivity" android:exported="false" />
+        <activity android:name=".DeskClockActivity" android:exported="false" android:configChanges="orientation|screenSize|keyboardHidden" />
         <service android:name=".AlarmRingingService" android:exported="false" android:foregroundServiceType="mediaPlayback" />
         <receiver android:name=".AlarmReceiver" android:exported="false" />
         <receiver android:name=".SnoozeReceiver" android:exported="false" />

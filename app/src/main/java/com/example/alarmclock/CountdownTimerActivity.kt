@@ -22,7 +22,7 @@ import androidx.appcompat.app.AppCompatActivity
 import java.util.Locale
 import kotlin.math.min
 
-class CountdownTimerActivity : AppCompatActivity() {
+class CountdownTimerActivity : BaseActivity() {
     private lateinit var display: TextView
     private lateinit var hoursPicker: NumberPicker
     private lateinit var minutesPicker: NumberPicker
@@ -78,7 +78,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         val center = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER }
         // Extra helper copy removed; the display shows the countdown only.
         display = text("۰۵:۰۰", 43f, primary, true).apply {
-            gravity = Gravity.CENTER; typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            gravity = Gravity.CENTER; typeface = UiFx.font(this@CountdownTimerActivity, 500); fontFeatureSettings = "tnum"
             includeFontPadding = false; setPadding(0, dp(8), 0, dp(5))
         }
         center.addView(display)
@@ -103,6 +103,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         }
         card.addView(presetRows)
         root.addView(card)
+        UiFx.enter(card, 60L)
 
         val pickerCard = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL; background = rounded(surface, dp(22), border)
@@ -134,6 +135,7 @@ class CountdownTimerActivity : AppCompatActivity() {
         pickers.addView(secondsPicker, LinearLayout.LayoutParams(0, dp(90), 1f))
         pickerCard.addView(pickers)
         root.addView(pickerCard)
+        UiFx.enter(pickerCard, 140L)
 
         val controls = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL; gravity = Gravity.CENTER; layoutDirection = View.LAYOUT_DIRECTION_RTL
@@ -146,6 +148,9 @@ class CountdownTimerActivity : AppCompatActivity() {
         controls.addView(reset, LinearLayout.LayoutParams(0, dp(56), 1f).apply { marginStart = dp(8) })
         reset.setOnClickListener { resetTimer() }
         root.addView(controls)
+        UiFx.enter(controls, 220L)
+        UiFx.pressable(startButton)
+        UiFx.pressable(reset)
         root.addView(Button(this).apply {
             text = "بازگشت"; isAllCaps = false; setTextColor(secondary)
             background = rounded(bg, dp(22), border); setOnClickListener { finish() }
@@ -234,7 +239,7 @@ class CountdownTimerActivity : AppCompatActivity() {
     }
 
     private fun actionButton(label: String, color: Int, textColor: Int) = Button(this).apply {
-        text = label; textSize = 14f; typeface = Typeface.DEFAULT_BOLD; isAllCaps = false
+        text = label; textSize = 14f; typeface = UiFx.font(this@CountdownTimerActivity, 700); isAllCaps = false
         setTextColor(textColor); background = rounded(color, dp(24), border)
         minHeight = dp(52) 
     }

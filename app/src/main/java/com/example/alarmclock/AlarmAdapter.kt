@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.example.alarmclock.databinding.ItemAlarmBinding
 import java.util.Calendar
-import java.util.Locale
 
 class AlarmAdapter(
     private val onItemClick: (Alarm) -> Unit,
@@ -28,7 +27,8 @@ class AlarmAdapter(
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(alarm: Alarm) {
-            binding.textTime.text = String.format(Locale.getDefault(), "%02d:%02d", alarm.hour, alarm.minute)
+            binding.textTime.text = PersianUtils.two(alarm.hour) + ":" + PersianUtils.two(alarm.minute)
+            binding.root.alpha = if (alarm.enabled) 1f else 0.55f
             binding.textDays.text = formatDays(alarm.dayList())
             binding.textLabel.text = alarm.label
             binding.textLabel.visibility = if (alarm.label.isBlank())

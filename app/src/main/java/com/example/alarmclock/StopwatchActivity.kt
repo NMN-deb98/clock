@@ -15,7 +15,7 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import java.util.Locale
 
-class StopwatchActivity : AppCompatActivity() {
+class StopwatchActivity : BaseActivity() {
     private val handler = Handler(Looper.getMainLooper())
     private var running = false
     private var startedAt = 0L
@@ -102,13 +102,15 @@ class StopwatchActivity : AppCompatActivity() {
         display = label("۰۰:۰۰.۰۰", 43f, primaryText, true).apply {
             gravity = Gravity.CENTER
             textDirection = View.TEXT_DIRECTION_LTR
-            typeface = Typeface.create("sans-serif-medium", Typeface.NORMAL)
+            typeface = UiFx.font(this@StopwatchActivity, 500)
+            fontFeatureSettings = "tnum"
             letterSpacing = 0.015f
             setPadding(0, dp(12), 0, dp(8))
             includeFontPadding = false
         }
         timerCard.addView(display)
         root.addView(timerCard)
+        UiFx.enter(timerCard, 60L)
 
         val stats = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -127,6 +129,7 @@ class StopwatchActivity : AppCompatActivity() {
         lastLapValue = last.second
         stats.addView(last.first, LinearLayout.LayoutParams(0, dp(78), 1f))
         root.addView(stats)
+        UiFx.enter(stats, 140L)
 
         val controls = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -147,6 +150,8 @@ class StopwatchActivity : AppCompatActivity() {
         controls.addView(resetButton, LinearLayout.LayoutParams(dp(58), dp(56)).apply { marginStart = dp(6) })
         resetButton.setOnClickListener { reset() }
         root.addView(controls)
+        UiFx.enter(controls, 220L)
+        listOf(startButton, lapButton, resetButton).forEach { UiFx.pressable(it) }
 
         val lapHeader = LinearLayout(this).apply {
             orientation = LinearLayout.HORIZONTAL
@@ -193,7 +198,7 @@ class StopwatchActivity : AppCompatActivity() {
         Button(this).apply {
             text = textValue
             textSize = 15f
-            typeface = Typeface.DEFAULT_BOLD
+            typeface = UiFx.font(this@StopwatchActivity, 700)
             setTextColor(textColor)
             background = rounded(backgroundColor, dp(24), getColor(R.color.surface_border))
             isAllCaps = false

@@ -1,42 +1,342 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android" xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent" android:layout_height="match_parent" android:layoutDirection="rtl" android:background="@color/app_background">
-<LinearLayout android:layout_width="match_parent" android:layout_height="match_parent" android:orientation="vertical" android:paddingTop="16dp">
-<ScrollView android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:fillViewport="true">
-<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingBottom="16dp">
-<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="vertical" android:paddingHorizontal="22dp" android:paddingBottom="18dp">
-<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="مدیریت زمان، به سبک تو" android:textColor="@color/accent_cyan" android:textSize="13sp" android:textStyle="bold" android:gravity="end"/>
-<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="6dp" android:text="@string/app_name" android:textColor="@color/text_primary" android:textSize="25sp" android:textStyle="bold" android:gravity="end"/>
-<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="برای زمانت برنامه داشته باش." android:textColor="@color/text_secondary" android:textSize="14sp" android:gravity="end"/>
-</LinearLayout>
-<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginHorizontal="16dp" android:orientation="vertical" android:padding="18dp" android:background="@drawable/bg_surface_card">
-<TextView android:layout_width="match_parent" android:layout_height="wrap_content" android:text="تا هشدار بعدی" android:textColor="@color/text_secondary" android:textSize="14sp" android:gravity="end"/>
-<TextView android:id="@+id/textNextAlarmCountdown" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="هنوز هشداری تنظیم نشده" android:textColor="@color/accent_cyan" android:textSize="23sp" android:textStyle="bold" android:gravity="end"/>
-<TextView android:id="@+id/textNextAlarmTime" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:text="یک هشدار اضافه کن تا زمان باقی‌مانده را ببینی." android:textColor="@color/text_primary" android:textSize="13sp" android:gravity="end"/>
-</LinearLayout>
-<LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:gravity="center_vertical" android:orientation="horizontal" android:paddingHorizontal="22dp" android:paddingTop="24dp" android:paddingBottom="10dp">
-<TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="هشدارهای من" android:textColor="@color/text_primary" android:textSize="19sp" android:textStyle="bold"/>
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="مدیریت زمان" android:textColor="@color/text_secondary" android:textSize="12sp"/>
-</LinearLayout>
-<androidx.recyclerview.widget.RecyclerView android:id="@+id/recyclerAlarms" android:layout_width="match_parent" android:layout_height="wrap_content" android:minHeight="180dp" android:nestedScrollingEnabled="false" android:clipToPadding="false" android:paddingHorizontal="10dp" android:paddingBottom="12dp"/>
-<TextView android:id="@+id/emptyView" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginHorizontal="32dp" android:background="@drawable/bg_surface_card" android:gravity="center" android:padding="24dp" android:text="@string/no_alarms_yet" android:textColor="@color/text_secondary" android:textSize="15sp" android:visibility="gone"/>
-</LinearLayout></ScrollView>
-<LinearLayout android:id="@+id/bottomNavigation" android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center" android:paddingHorizontal="4dp" android:paddingTop="5dp" android:paddingBottom="5dp" android:background="@color/surface_primary">
-<LinearLayout android:id="@+id/buttonHome" android:layout_width="0dp" android:layout_height="72dp" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true" android:background="?attr/selectableItemBackground">
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⏰" android:textSize="27sp" android:gravity="center" android:includeFontPadding="false" android:contentDescription="هشدارها"/>
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="هشدارها" android:textSize="11sp" android:textStyle="bold" android:textColor="@color/accent_cyan" android:gravity="center"/>
-</LinearLayout>
-<LinearLayout android:id="@+id/buttonWorldClock" android:layout_width="0dp" android:layout_height="72dp" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true" android:background="?attr/selectableItemBackground">
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="🌐" android:textSize="27sp" android:gravity="center" android:includeFontPadding="false"/>
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="ساعت جهانی" android:textSize="11sp" android:textColor="@color/text_primary" android:gravity="center"/>
-</LinearLayout>
-<LinearLayout android:id="@+id/buttonStopwatch" android:layout_width="0dp" android:layout_height="72dp" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true" android:background="?attr/selectableItemBackground">
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⏱️" android:textSize="27sp" android:gravity="center" android:includeFontPadding="false"/>
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="کرنومتر" android:textSize="11sp" android:textColor="@color/text_primary" android:gravity="center"/>
-</LinearLayout>
-<LinearLayout android:id="@+id/buttonTimer" android:layout_width="0dp" android:layout_height="72dp" android:layout_weight="1" android:orientation="vertical" android:gravity="center" android:clickable="true" android:focusable="true" android:background="?attr/selectableItemBackground">
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="⏳" android:textSize="27sp" android:gravity="center" android:includeFontPadding="false"/>
-<TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="5dp" android:text="زمان‌سنج" android:textSize="11sp" android:textColor="@color/text_primary" android:gravity="center"/>
-</LinearLayout>
-</LinearLayout></LinearLayout>
-<com.google.android.material.floatingactionbutton.FloatingActionButton android:id="@+id/fabAdd" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="bottom|start" android:layout_marginBottom="86dp" android:layout_marginStart="22dp" android:contentDescription="@string/new_alarm" android:src="@android:drawable/ic_input_add" app:backgroundTint="@color/accent_violet" app:elevation="8dp" app:tint="@color/app_background"/>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/app_background"
+    android:layoutDirection="rtl">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true">
+
+            <LinearLayout
+                android:id="@+id/contentColumn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingBottom="96dp">
+
+                <LinearLayout
+                    android:id="@+id/headerBlock"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:paddingHorizontal="22dp"
+                    android:paddingTop="26dp"
+                    android:paddingBottom="18dp">
+
+                    <TextView
+                        android:id="@+id/textGreeting"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="سلام"
+                        android:textColor="@color/accent_cyan"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/app_name"
+                        android:textColor="@color/text_primary"
+                        android:textSize="32sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textTodayDate"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="14sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/heroCard"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:background="@drawable/bg_hero_card"
+                    android:elevation="6dp"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="20dp">
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="تا هشدار بعدی"
+                            android:textColor="@color/text_secondary"
+                            android:textSize="13sp" />
+
+                        <TextView
+                            android:id="@+id/textNextAlarmCountdown"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="هنوز هشداری تنظیم نشده"
+                            android:textColor="@color/accent_cyan"
+                            android:textSize="21sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/textNextAlarmTime"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:text="یک هشدار اضافه کن تا زمان باقی‌مانده را ببینی."
+                            android:textColor="@color/text_primary"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:id="@+id/heroIconFrame"
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_marginStart="14dp"
+                        android:background="@drawable/bg_icon_circle">
+
+                        <ImageView
+                            android:id="@+id/heroIcon"
+                            android:layout_width="30dp"
+                            android:layout_height="30dp"
+                            android:layout_gravity="center"
+                            android:importantForAccessibility="no"
+                            android:src="@drawable/ic_alarm"
+                            app:tint="@color/accent_cyan" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="22dp"
+                    android:paddingTop="26dp"
+                    android:paddingBottom="10dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="هشدارهای من"
+                        android:textColor="@color/text_primary"
+                        android:textSize="19sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/textAlarmCount"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+                </LinearLayout>
+
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/recyclerAlarms"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:clipToPadding="false"
+                    android:layoutAnimation="@anim/layout_item_enter"
+                    android:minHeight="120dp"
+                    android:nestedScrollingEnabled="false"
+                    android:paddingHorizontal="10dp"
+                    android:paddingBottom="12dp" />
+
+                <TextView
+                    android:id="@+id/emptyView"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="32dp"
+                    android:background="@drawable/bg_surface_card"
+                    android:gravity="center"
+                    android:padding="24dp"
+                    android:text="@string/no_alarms_yet"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="15sp"
+                    android:visibility="gone" />
+            </LinearLayout>
+        </ScrollView>
+
+        <LinearLayout
+            android:id="@+id/bottomNavigation"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/bg_bottom_nav"
+            android:elevation="12dp"
+            android:gravity="center"
+            android:orientation="horizontal"
+            android:paddingHorizontal="6dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp">
+
+            <LinearLayout
+                android:id="@+id/buttonHome"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="3dp"
+                android:layout_weight="1"
+                android:background="@drawable/bg_nav_active"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_alarm"
+                    app:tint="@color/accent_cyan" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="هشدارها"
+                    android:textColor="@color/accent_cyan"
+                    android:textSize="11sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/buttonWorldClock"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="3dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_globe"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="ساعت جهانی"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/buttonStopwatch"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="3dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_stopwatch"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="کرنومتر"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/buttonTimer"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="3dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_hourglass"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="زمان‌سنج"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/buttonDeskClock"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="3dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_desk"
+                    app:tint="@color/accent_amber" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="رومیزی"
+                    android:textColor="@color/accent_amber"
+                    android:textSize="11sp" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+        android:id="@+id/fabAdd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|start"
+        android:layout_marginStart="18dp"
+        android:layout_marginBottom="92dp"
+        android:contentDescription="@string/new_alarm"
+        android:text="@string/new_alarm"
+        android:textColor="@color/app_background"
+        app:backgroundTint="@color/accent_violet"
+        app:elevation="8dp"
+        app:icon="@drawable/ic_add"
+        app:iconTint="@color/app_background" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -45,13 +45,14 @@ class SplashActivity : AppCompatActivity() {
             gravity = android.view.Gravity.CENTER
         })
         setContentView(root)
+        UiFx.enterAll(root, 100L, 170L)
         handler.postDelayed({
             if (!isFinishing) {
                 startActivity(Intent(this, MainActivity::class.java))
                 finish()
                 overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
             }
-        }, 1500)
+        }, 1800)
     }
 
     override fun onDestroy() {

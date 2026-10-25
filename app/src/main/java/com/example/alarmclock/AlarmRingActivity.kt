@@ -30,6 +30,7 @@ class AlarmRingActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAlarmRingBinding
     private var ringtone: Ringtone? = null
     private var vibrator: Vibrator? = null
+    private var iconPulse: android.animation.ObjectAnimator? = null
     private var alarmId: Int = -1
     private var deleteAfterRinging: Boolean = false
     private var wakeMode: String = "NONE"
@@ -88,6 +89,7 @@ class AlarmRingActivity : AppCompatActivity() {
             }
         }
         binding.buttonSnooze.setOnClickListener { snoozeAndFinish() }
+        iconPulse = UiFx.breathe(binding.ringIcon, 1.18f, 650L)
     }
 
     private fun setShowWhenLockedAndTurnScreenOn() {
@@ -329,6 +331,7 @@ class AlarmRingActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        iconPulse?.cancel()
         ringtone?.stop()
         vibrator?.cancel()
         super.onDestroy()

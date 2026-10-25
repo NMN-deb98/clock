@@ -55,3 +55,12 @@ app/src/main/java/com/example/alarmclock/
   AlarmRingActivity.kt    صفحه تمام‌صفحه زنگ خوردن
   AlarmAdapter.kt         نمایش لیست در RecyclerView
   AlarmViewModel.kt       ارتباط UI با دیتابیس
+
+
+تغییرات اخیر (رابط کاربری و ساعت جهانی)
+-----------------------------------------
+- ساعت جهانی: رفع باگ شهرهای نامعتبر، تاریخ شمسی، اختلاف زمان با شما، ساعت عقربه‌ای زنده برای هر شهر
+- فونت فارسی وزیرمتن (Vazirmatn) داخل برنامه (app/src/main/res/font) - مجوز OFL در third-party/Vazirmatn-OFL.txt
+- طراحی دوبارهٔ صفحهٔ اصلی، آیکون‌های برداری، انیمیشن ورود و انتقال بین صفحه‌ها
+- قابلیت جدید: ساعت رومیزی (DeskClockActivity) - لمس: تغییر رنگ، کشیدن بالا/پایین: نور صفحه
+- فایل‌های جدید: PersianUtils.kt (اعداد و تقویم شمسی)، UiFx.kt (انیمیشن‌ها)، AnalogClockView.kt (ساعت عقربه‌ای)، BaseActivity.kt
