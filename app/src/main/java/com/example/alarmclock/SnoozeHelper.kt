@@ -26,14 +26,14 @@ object SnoozeHelper {
         customPhrase: String = "",
         touchTarget: Int = 30,
         patternSize: Int = 3
-    ) {
-        if (alarmId < 0 || minutes <= 0) return
+    ): Boolean {
+        if (alarmId < 0 || minutes <= 0) return false
         val preferences = context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
         val allowedSnoozes = preferences.getInt("snooze_count", 3).coerceIn(0, 10)
         val usedSnoozes = preferences.getInt("snooze_used_" + alarmId, 0)
         if (usedSnoozes >= allowedSnoozes) {
             android.widget.Toast.makeText(context, "تعداد دفعات چرت زدن تمام شده است.", android.widget.Toast.LENGTH_LONG).show()
-            return
+            return false
         }
         val selectedMinutes = preferences.getInt("snooze_minutes", minutes).coerceIn(1, 30)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
@@ -68,9 +68,11 @@ object SnoozeHelper {
                 pendingIntent
             )
             preferences.edit().putInt("snooze_used_" + alarmId, usedSnoozes + 1).apply()
+            return true
         } catch (_: SecurityException) {
             // Exact-alarm access can be revoked while the app is running.
             // Avoid crashing; callers can restore exact-alarm access in Settings.
+            return false
         }
     }
 }
