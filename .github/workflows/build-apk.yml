@@ -55,7 +55,7 @@ jobs:
           path: Hooshyar-v1.0.${{ github.run_number }}.apk
           if-no-files-found: error
           retention-days: 30
-      - name: Update Hooshyar v1.0.62 release notes
+      - name: Publish Hooshyar release
         if: "github.ref == 'refs/heads/main' && contains(github.event.head_commit.message, 'docs(release): document Hooshyar changes')"
         env:
           GH_TOKEN: ${{ github.token }}
@@ -75,6 +75,7 @@ jobs:
           > توجه: روی بعضی گوشی‌ها (شیائومی، سامسونگ و...) باید در تنظیمات گوشی اجازهٔ «نمایش روی صفحهٔ قفل» را هم بدهید.
           NOTES
           sed -i 's/^          //' release-notes.md
+          TAG="v1.0.${{ github.run_number }}"
           gh release create "$TAG" "Hooshyar-v1.0.${{ github.run_number }}.apk" \
             --repo "${{ github.repository }}" \
             --title "Hooshyar $TAG" \
