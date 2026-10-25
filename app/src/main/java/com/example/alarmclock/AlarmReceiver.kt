@@ -67,6 +67,12 @@ class AlarmReceiver : BroadcastReceiver() {
             putExtra("wake_mode", source.getStringExtra("wake_mode") ?: "NONE")
             putExtra("math_difficulty", source.getStringExtra("math_difficulty") ?: "MEDIUM")
             putExtra("delete_after_ringing", source.getBooleanExtra("delete_after_ringing", false))
+            putExtra("walk_target", source.getIntExtra("walk_target", 40))
+            putExtra("shake_difficulty", source.getStringExtra("shake_difficulty") ?: "MEDIUM")
+            putExtra("type_mode", source.getStringExtra("type_mode") ?: "RANDOM")
+            putExtra("custom_phrase", source.getStringExtra("custom_phrase").orEmpty())
+            putExtra("touch_target", source.getIntExtra("touch_target", 30))
+            putExtra("pattern_size", source.getIntExtra("pattern_size", 3))
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             context.startForegroundService(serviceIntent)
