@@ -12,6 +12,9 @@ class AlarmReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val alarmId = intent.getIntExtra("alarm_id", -1)
         if (alarmId < 0) return
+        // A fresh scheduled alarm starts a new snooze allowance; snooze broadcasts use SnoozeReceiver.
+        context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
+            .edit().putInt("snooze_used_" + alarmId, 0).apply()
 
         // Start the ringing foreground service directly from the alarm broadcast.
         // Do not make the alarm's audible start wait for a Room database read.
