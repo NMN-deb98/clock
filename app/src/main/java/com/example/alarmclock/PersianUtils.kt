@@ -83,6 +83,23 @@ object PersianUtils {
         return if (withWeekday) weekdayName(cal.get(Calendar.DAY_OF_WEEK)) + "، " + core else core
     }
 
+    /** Fixed-date Iranian public holidays; lunar-calendar holidays need an annually updated calendar. */
+    fun isIranianFixedHoliday(millis: Long = System.currentTimeMillis()): Boolean {
+        val cal = Calendar.getInstance().apply { timeInMillis = millis }
+        val jalali = gregorianToJalali(
+            cal.get(Calendar.YEAR), cal.get(Calendar.MONTH) + 1, cal.get(Calendar.DAY_OF_MONTH)
+        )
+        val month = jalali[1]
+        val day = jalali[2]
+        return (month == 1 && day in 1..4) ||
+            (month == 1 && day == 12) ||
+            (month == 1 && day == 13) ||
+            (month == 3 && day == 14) ||
+            (month == 3 && day == 15) ||
+            (month == 11 && day == 22) ||
+            (month == 12 && day == 29)
+    }
+
     fun greeting(hourOfDay: Int): String = when (hourOfDay) {
         in 5..11 -> "صبح بخیر"
         in 12..15 -> "ظهر بخیر"
