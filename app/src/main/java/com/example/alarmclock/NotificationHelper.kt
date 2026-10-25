@@ -30,7 +30,9 @@ object NotificationHelper {
 
     fun buildAlarmNotification(
         context: Context, alarmId: Int, label: String, ringtoneUri: String,
-        vibrate: Boolean, wakeMode: String, mathDifficulty: String, deleteAfterRinging: Boolean
+        vibrate: Boolean, wakeMode: String, mathDifficulty: String, deleteAfterRinging: Boolean,
+        walkTarget: Int = 40, shakeDifficulty: String = "MEDIUM", typeMode: String = "RANDOM",
+        customPhrase: String = "", touchTarget: Int = 30, patternSize: Int = 3
     ): Notification {
         createChannel(context)
         val intent = Intent(context, AlarmRingActivity::class.java).apply {
