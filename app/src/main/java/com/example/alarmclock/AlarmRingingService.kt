@@ -59,7 +59,13 @@ class AlarmRingingService : Service() {
             this, id, label, uri, vibrate,
             intent.getStringExtra("wake_mode") ?: "NONE",
             intent.getStringExtra("math_difficulty") ?: "MEDIUM",
-            intent.getBooleanExtra("delete_after_ringing", false)
+            intent.getBooleanExtra("delete_after_ringing", false),
+            intent.getIntExtra("walk_target", 40),
+            intent.getStringExtra("shake_difficulty") ?: "MEDIUM",
+            intent.getStringExtra("type_mode") ?: "RANDOM",
+            intent.getStringExtra("custom_phrase").orEmpty(),
+            intent.getIntExtra("touch_target", 30),
+            intent.getIntExtra("pattern_size", 3)
         )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             startForeground(id, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
