@@ -315,7 +315,7 @@ class DeskClockActivity : BaseActivity() {
         val minuteKey = hour * 60 + minute
         if (minuteKey != lastMinuteKey) {
             lastMinuteKey = minuteKey
-            greetingView.text = PersianUtils.greeting(hour)
+            greetingView.text = (if (hour in 6..17) "☀️ " else "🌙 ") + PersianUtils.greeting(hour)
             dateView.text = PersianUtils.dateText(cal)
             drift()
         }
