@@ -23,7 +23,13 @@ class AlarmActionReceiver : BroadcastReceiver() {
                     vibrate = intent.getBooleanExtra("vibrate", true),
                     wakeMode = intent.getStringExtra("wake_mode") ?: "NONE",
                     mathDifficulty = intent.getStringExtra("math_difficulty") ?: "MEDIUM",
-                    deleteAfterRinging = intent.getBooleanExtra("delete_after_ringing", false)
+                    deleteAfterRinging = intent.getBooleanExtra("delete_after_ringing", false),
+                    walkTarget = intent.getIntExtra("walk_target", 40),
+                    shakeDifficulty = intent.getStringExtra("shake_difficulty") ?: "MEDIUM",
+                    typeMode = intent.getStringExtra("type_mode") ?: "RANDOM",
+                    customPhrase = intent.getStringExtra("custom_phrase").orEmpty(),
+                    touchTarget = intent.getIntExtra("touch_target", 30),
+                    patternSize = intent.getIntExtra("pattern_size", 3)
                 )
             }
             ACTION_DISMISS -> {
