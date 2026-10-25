@@ -45,6 +45,20 @@ class AlarmRingingService : Service() {
             startForeground(id, notification, android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK)
         } else startForeground(id, notification)
         startPlayback(uri, vibrate)
+        // Besides the full-screen notification, try opening the ring screen directly.
+        // Android may refuse this from the background; the notification covers that case.
+        runCatching {
+            startActivity(Intent(this, AlarmRingActivity::class.java).apply {
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                putExtra("alarm_id", id)
+                putExtra("label", label)
+                putExtra("ringtone_uri", uri)
+                putExtra("vibrate", vibrate)
+                putExtra("wake_mode", intent.getStringExtra("wake_mode") ?: "NONE")
+                putExtra("math_difficulty", intent.getStringExtra("math_difficulty") ?: "MEDIUM")
+                putExtra("delete_after_ringing", intent.getBooleanExtra("delete_after_ringing", false))
+            })
+        }
         return START_NOT_STICKY
     }
 

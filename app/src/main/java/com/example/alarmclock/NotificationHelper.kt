@@ -45,9 +45,30 @@ object NotificationHelper {
         }
         val pending = PendingIntent.getActivity(context, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val body = label.ifBlank { context.getString(R.string.no_note) }
+        fun actionIntent(action: String) = Intent(context, AlarmActionReceiver::class.java).apply {
+            this.action = action
+            setPackage(context.packageName)
+            putExtra("alarm_id", alarmId)
+            putExtra("label", label)
+            putExtra("ringtone_uri", ringtoneUri)
+            putExtra("vibrate", vibrate)
+            putExtra("wake_mode", wakeMode)
+            putExtra("math_difficulty", mathDifficulty)
+            putExtra("delete_after_ringing", deleteAfterRinging)
+        }
+        val snoozePending = PendingIntent.getBroadcast(
+            context, 20000 + alarmId, actionIntent(AlarmActionReceiver.ACTION_SNOOZE),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        // With a wake-up challenge the dismiss button opens the challenge screen instead of silencing directly.
+        val dismissPending = if (wakeMode == "NONE") PendingIntent.getBroadcast(
+            context, 30000 + alarmId, actionIntent(AlarmActionReceiver.ACTION_DISMISS),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        ) else pending
+        val dismissText = if (wakeMode == "NONE") context.getString(R.string.dismiss) else "حل چالش و خاموش کردن"
         return NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle(context.getString(R.string.alarm_ringing))
+            .setContentTitle(context.getString(R.string.alarm_ringing) + " • " + PersianUtils.two(java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)) + ":" + PersianUtils.two(java.util.Calendar.getInstance().get(java.util.Calendar.MINUTE)))
             .setContentText(body)
             .setStyle(NotificationCompat.BigTextStyle().bigText(body))
             .setPriority(NotificationCompat.PRIORITY_MAX)
@@ -55,6 +76,8 @@ object NotificationHelper {
             .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
+            .addAction(0, dismissText, dismissPending)
+            .addAction(0, "۱۰ دقیقه بعد", snoozePending)
             .setFullScreenIntent(pending, true)
             .setContentIntent(pending)
             .setAutoCancel(false)

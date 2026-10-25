@@ -31,6 +31,14 @@ class AlarmRingActivity : AppCompatActivity() {
     private var ringtone: Ringtone? = null
     private var vibrator: Vibrator? = null
     private var iconPulse: android.animation.ObjectAnimator? = null
+    private val pulseAnimators = mutableListOf<android.animation.Animator>()
+    private val tickHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val tick = object : Runnable {
+        override fun run() {
+            updateClock()
+            tickHandler.postDelayed(this, 1000L)
+        }
+    }
     private var alarmId: Int = -1
     private var deleteAfterRinging: Boolean = false
     private var wakeMode: String = "NONE"
@@ -89,7 +97,80 @@ class AlarmRingActivity : AppCompatActivity() {
             }
         }
         binding.buttonSnooze.setOnClickListener { snoozeAndFinish() }
-        iconPulse = UiFx.breathe(binding.ringIcon, 1.18f, 650L)
+        applyFonts()
+        iconPulse = UiFx.breathe(binding.ringIcon, 1.12f, 650L)
+        startPulses()
+        updateClock()
+    }
+
+    private fun applyFonts() {
+        binding.textTime.typeface = UiFx.font(this, 300)
+        binding.textDate.typeface = UiFx.font(this, 400)
+        binding.textTitle.typeface = UiFx.font(this, 500)
+        binding.textNote.typeface = UiFx.font(this, 500)
+        binding.textDifficulty.typeface = UiFx.font(this, 700)
+        binding.buttonDismiss.typeface = UiFx.font(this, 700)
+        binding.buttonSnooze.typeface = UiFx.font(this, 500)
+    }
+
+    private fun updateClock() {
+        val now = System.currentTimeMillis()
+        val cal = PersianUtils.newCalendar(java.util.TimeZone.getDefault(), now)
+        binding.textTime.text = PersianUtils.two(cal.get(java.util.Calendar.HOUR_OF_DAY)) + ":" +
+            PersianUtils.two(cal.get(java.util.Calendar.MINUTE))
+        binding.textDate.text = PersianUtils.dateText(cal)
+    }
+
+    private fun startPulses() {
+        listOf(binding.pulse1, binding.pulse2, binding.pulse3).forEachIndexed { i, v ->
+            val a = android.animation.ObjectAnimator.ofPropertyValuesHolder(
+                v,
+                android.animation.PropertyValuesHolder.ofFloat(View.SCALE_X, 0.9f, 2.1f),
+                android.animation.PropertyValuesHolder.ofFloat(View.SCALE_Y, 0.9f, 2.1f),
+                android.animation.PropertyValuesHolder.ofFloat(View.ALPHA, 0.9f, 0f)
+            )
+            a.duration = 2400L
+            a.startDelay = i * 800L
+            a.repeatCount = android.animation.ObjectAnimator.INFINITE
+            a.interpolator = android.view.animation.DecelerateInterpolator()
+            a.start()
+            pulseAnimators.add(a)
+        }
+    }
+
+    private val closeReceiver = object : android.content.BroadcastReceiver() {
+        override fun onReceive(context: android.content.Context?, intent: Intent?) { finish() }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val filter = android.content.IntentFilter(AlarmActionReceiver.ACTION_CLOSE_RING)
+        if (Build.VERSION.SDK_INT >= 33) registerReceiver(closeReceiver, filter, android.content.Context.RECEIVER_NOT_EXPORTED)
+        else {
+            @Suppress("UnspecifiedRegisterReceiverFlag")
+            registerReceiver(closeReceiver, filter)
+        }
+    }
+
+    override fun onStop() {
+        runCatching { unregisterReceiver(closeReceiver) }
+        super.onStop()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        tickHandler.removeCallbacks(tick)
+        tickHandler.post(tick)
+    }
+
+    override fun onPause() {
+        tickHandler.removeCallbacks(tick)
+        super.onPause()
+    }
+
+    override fun onNewIntent(intent: Intent?) {
+        super.onNewIntent(intent)
+        if (intent != null) setIntent(intent)
     }
 
     private fun setShowWhenLockedAndTurnScreenOn() {
@@ -332,6 +413,8 @@ class AlarmRingActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         iconPulse?.cancel()
+        pulseAnimators.forEach { it.cancel() }
+        tickHandler.removeCallbacks(tick)
         ringtone?.stop()
         vibrator?.cancel()
         super.onDestroy()
