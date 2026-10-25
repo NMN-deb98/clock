@@ -441,7 +441,7 @@ class AlarmRingActivity : AppCompatActivity() {
         dialog.setOnShowListener {
             dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
             dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(getColor(R.color.accent_cyan))
-            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setOnClickListener { dialog.dismiss() }
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setOnClickListener { /* Keep progress visible while the sensor challenge continues. */ }
         }
         dialog.show()
         dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
@@ -604,6 +604,11 @@ class AlarmRingActivity : AppCompatActivity() {
     }
 
     private class PatternChallengeView(context: android.content.Context, private val grid: Int) : View(context) {
+        init {
+            val minSide = (320 * resources.displayMetrics.density).toInt()
+            minimumWidth = minSide
+            minimumHeight = minSide
+        }
         private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
         private val path = Path()
         private val points = mutableListOf<Pair<Float, Float>>()
