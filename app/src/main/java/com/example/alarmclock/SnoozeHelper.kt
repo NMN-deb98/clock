@@ -43,6 +43,12 @@ object SnoozeHelper {
             putExtra("wake_mode", wakeMode)
             putExtra("math_difficulty", mathDifficulty)
             putExtra("delete_after_ringing", deleteAfterRinging)
+            putExtra("walk_target", preferences.getInt("walk_target_" + alarmId, 40))
+            putExtra("shake_difficulty", preferences.getString("shake_difficulty_" + alarmId, "MEDIUM"))
+            putExtra("type_mode", preferences.getString("type_mode_" + alarmId, "RANDOM"))
+            putExtra("custom_phrase", preferences.getString("custom_phrase_" + alarmId, ""))
+            putExtra("touch_target", preferences.getInt("touch_target_" + alarmId, 30))
+            putExtra("pattern_size", preferences.getInt("pattern_size_" + alarmId, 3))
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
