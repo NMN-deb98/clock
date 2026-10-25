@@ -726,7 +726,13 @@ class AlarmRingActivity : AppCompatActivity() {
             vibrate = intent.getBooleanExtra("vibrate", true),
             wakeMode = wakeMode,
             mathDifficulty = mathDifficulty,
-            deleteAfterRinging = deleteAfterRinging)
+            deleteAfterRinging = deleteAfterRinging,
+            walkTarget = walkTarget,
+            shakeDifficulty = shakeDifficulty,
+            typeMode = typeMode,
+            customPhrase = customPhrase,
+            touchTarget = touchTarget,
+            patternSize = patternSize)
         finish()
     }
 
