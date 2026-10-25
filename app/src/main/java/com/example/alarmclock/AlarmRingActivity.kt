@@ -721,11 +721,7 @@ class AlarmRingActivity : AppCompatActivity() {
     }
 
     private fun snoozeAndFinish() {
-        stopAlarmService()
-        ringtone?.stop()
-        vibrator?.cancel()
-        NotificationHelper.cancelNotification(this, alarmId)
-        SnoozeHelper.snooze(this, alarmId, minutes = 10,
+        val scheduled = SnoozeHelper.snooze(this, alarmId, minutes = 10,
             label = intent.getStringExtra("label") ?: "",
             ringtoneUri = intent.getStringExtra("ringtone_uri") ?: "",
             vibrate = intent.getBooleanExtra("vibrate", true),
@@ -738,6 +734,11 @@ class AlarmRingActivity : AppCompatActivity() {
             customPhrase = customPhrase,
             touchTarget = touchTarget,
             patternSize = patternSize)
+        if (!scheduled) return
+        stopAlarmService()
+        ringtone?.stop()
+        vibrator?.cancel()
+        NotificationHelper.cancelNotification(this, alarmId)
         finish()
     }
 
