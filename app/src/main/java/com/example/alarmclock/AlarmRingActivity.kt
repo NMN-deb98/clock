@@ -3,6 +3,13 @@ package com.example.alarmclock
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Paint
+import android.graphics.Path
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import android.media.Ringtone
 import android.media.RingtoneManager
 import android.net.Uri
@@ -43,6 +50,24 @@ class AlarmRingActivity : AppCompatActivity() {
     private var deleteAfterRinging: Boolean = false
     private var wakeMode: String = "NONE"
     private var mathDifficulty: String = "MEDIUM"
+    private var walkTarget: Int = 40
+    private var shakeDifficulty: String = "MEDIUM"
+    private var typeMode: String = "RANDOM"
+    private var customPhrase: String = ""
+    private var touchTarget: Int = 30
+    private var patternSize: Int = 3
+    private var challengeDialog: AlertDialog? = null
+    private var challengeProgressView: TextView? = null
+    private var stepBaseline: Float? = null
+    private var completedSteps = 0
+    private var shakeCount = 0
+    private var lastShakeAt = 0L
+    private var sensorManager: SensorManager? = null
+    private var activeSensor: Sensor? = null
+    private var activeSensorListener: SensorEventListener? = null
+    private val challengeHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var holdStartedAt = 0L
+    private var holdRunnable: Runnable? = null
     private var mathQuestions: List<MathQuestion> = emptyList()
     private var mathIndex = 0
     private var photoIndex = 0
@@ -90,6 +115,12 @@ class AlarmRingActivity : AppCompatActivity() {
         wakeMode = intent.getStringExtra("wake_mode") ?: "NONE"
         mathDifficulty = intent.getStringExtra("math_difficulty") ?: "MEDIUM"
         deleteAfterRinging = intent.getBooleanExtra("delete_after_ringing", false)
+        walkTarget = intent.getIntExtra("walk_target", 40).coerceIn(1, 10000)
+        shakeDifficulty = intent.getStringExtra("shake_difficulty") ?: "MEDIUM"
+        typeMode = intent.getStringExtra("type_mode") ?: "RANDOM"
+        customPhrase = intent.getStringExtra("custom_phrase").orEmpty()
+        touchTarget = intent.getIntExtra("touch_target", 30).coerceIn(1, 10000)
+        patternSize = intent.getIntExtra("pattern_size", 3).coerceIn(3, 5)
         binding.textNote.text = label.ifBlank { getString(R.string.no_note) }
 
         // AlarmRingingService owns playback so sound survives if this Activity cannot open over lock screen.
@@ -101,11 +132,20 @@ class AlarmRingActivity : AppCompatActivity() {
             binding.buttonDismiss.text = "شروع چالش"
         } else if (wakeMode == "PHOTO") {
             binding.buttonDismiss.text = "شروع چالش عکس"
+        } else if (wakeMode != "NONE") {
+            binding.buttonDismiss.text = "شروع چالش بیداری"
         }
         binding.buttonDismiss.setOnClickListener {
             when (wakeMode) {
                 "MATH" -> showMathQuestion()
                 "PHOTO" -> capturePhoto()
+                "WALK" -> startWalkChallenge()
+                "SHAKE" -> startShakeChallenge()
+                "TYPE" -> startTypingChallenge()
+                "TOUCH" -> startTouchChallenge()
+                "PATTERN" -> startPatternChallenge()
+                "MEMORY" -> startMemoryChallenge()
+                "HOLD" -> startHoldChallenge()
                 else -> stopAndFinish()
             }
         }
@@ -380,6 +420,285 @@ class AlarmRingActivity : AppCompatActivity() {
             .show()
     }
 
+    private fun showProgressChallenge(title: String, initialText: String): AlertDialog {
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(28, 16, 28, 12)
+            addView(TextView(this@AlarmRingActivity).apply {
+                text = initialText
+                textSize = 18f
+                gravity = android.view.Gravity.CENTER
+                setTextColor(getColor(R.color.text_primary))
+                challengeProgressView = this
+            })
+        }
+        val dialog = AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(content)
+            .setCancelable(false)
+            .setNegativeButton("ادامه چالش", null)
+            .create()
+        dialog.setOnShowListener {
+            dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setTextColor(getColor(R.color.accent_cyan))
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setOnClickListener { dialog.dismiss() }
+        }
+        dialog.show()
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
+        challengeDialog = dialog
+        return dialog
+    }
+
+    private fun stopChallengeSensor() {
+        activeSensorListener?.let { listener -> sensorManager?.unregisterListener(listener) }
+        activeSensorListener = null
+        activeSensor = null
+        sensorManager = null
+        challengeHandler.removeCallbacksAndMessages(null)
+    }
+
+    private fun startWalkChallenge() {
+        val manager = getSystemService(SENSOR_SERVICE) as SensorManager
+        val sensor = manager.getDefaultSensor(Sensor.TYPE_STEP_COUNTER)
+        if (sensor == null) {
+            AlertDialog.Builder(this).setTitle("شمارش قدم پشتیبانی نمی‌شود")
+                .setMessage("حسگر شمارش قدم در این گوشی در دسترس نیست. از روش تکان دادن یا لمس صفحه استفاده کن.")
+                .setPositiveButton("متوجه شدم", null).show()
+            return
+        }
+        stepBaseline = null
+        completedSteps = 0
+        showProgressChallenge("راه برو", "۰ از " + PersianUtils.digits(walkTarget) + " قدم")
+        sensorManager = manager
+        activeSensor = sensor
+        activeSensorListener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                val current = event.values.firstOrNull() ?: return
+                val baseline = stepBaseline
+                if (baseline == null) stepBaseline = current
+                else completedSteps = (current - baseline).toInt().coerceAtLeast(0)
+                challengeProgressView?.text = PersianUtils.digits(completedSteps) + " از " + PersianUtils.digits(walkTarget) + " قدم"
+                if (completedSteps >= walkTarget) {
+                    stopChallengeSensor()
+                    challengeDialog?.dismiss()
+                    stopAndFinish()
+                }
+            }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+        manager.registerListener(activeSensorListener, sensor, SensorManager.SENSOR_DELAY_NORMAL)
+    }
+
+    private fun startShakeChallenge() {
+        val target = when (shakeDifficulty) { "EASY" -> 12; "VERY_HARD" -> 45; else -> 28 }
+        shakeCount = 0
+        val manager = getSystemService(SENSOR_SERVICE) as SensorManager
+        val sensor = manager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+        if (sensor == null) {
+            AlertDialog.Builder(this).setMessage("حسگر حرکتی در دسترس نیست.").setPositiveButton("باشه", null).show()
+            return
+        }
+        showProgressChallenge("گوشی را تکان بده", "۰ از " + PersianUtils.digits(target))
+        sensorManager = manager
+        activeSensor = sensor
+        activeSensorListener = object : SensorEventListener {
+            override fun onSensorChanged(event: SensorEvent) {
+                val magnitude = kotlin.math.sqrt(event.values.sumOf { it.toDouble() * it.toDouble() }).toFloat()
+                val now = System.currentTimeMillis()
+                if (magnitude > 17f && now - lastShakeAt > 300L) {
+                    lastShakeAt = now
+                    shakeCount++
+                    challengeProgressView?.text = PersianUtils.digits(shakeCount) + " از " + PersianUtils.digits(target)
+                    if (shakeCount >= target) {
+                        stopChallengeSensor()
+                        challengeDialog?.dismiss()
+                        stopAndFinish()
+                    }
+                }
+            }
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+        manager.registerListener(activeSensorListener, sensor, SensorManager.SENSOR_DELAY_GAME)
+    }
+
+    private fun startTypingChallenge() {
+        val motivational = listOf(
+            "من امروز با انرژی از خواب بیدار می‌شوم",
+            "هر روز فرصتی تازه برای پیشرفت است",
+            "قدم‌های کوچک من نتیجه‌های بزرگ می‌سازند",
+            "من می‌توانم روزم را خوب شروع کنم"
+        )
+        val expected = when (typeMode) {
+            "MOTIVATIONAL" -> motivational.random()
+            "CUSTOM" -> customPhrase.ifBlank { "امروز روز خوبی است" }
+            else -> buildString { repeat(8) { append("ABCDEFGHJKLMNPQRSTUVWXYZ23456789".random()) } }
+        }
+        val input = EditText(this).apply {
+            hint = "متن بالا را دقیق تایپ کن"
+            setSingleLine(false)
+            textSize = 16f
+            setTextColor(getColor(R.color.text_primary))
+            setHintTextColor(getColor(R.color.text_secondary))
+        }
+        val content = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            setPadding(24, 10, 24, 4)
+            addView(TextView(this@AlarmRingActivity).apply {
+                text = expected
+                textSize = 19f
+                gravity = android.view.Gravity.CENTER
+                setTextColor(getColor(R.color.accent_cyan))
+                setPadding(0, 12, 0, 18)
+            })
+            addView(input)
+        }
+        val dialog = AlertDialog.Builder(this).setTitle("متن را تایپ کن").setView(content)
+            .setCancelable(false).setNegativeButton("بررسی", null).create()
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setOnClickListener {
+                if (input.text.toString().trim() == expected) {
+                    dialog.dismiss(); stopAndFinish()
+                } else input.error = "متن دقیقاً با نمونه یکسان نیست."
+            }
+        }
+        dialog.show()
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
+    }
+
+    private fun startTouchChallenge() {
+        var count = 0
+        val target = touchTarget.coerceIn(1, 10000)
+        val text = TextView(this).apply {
+            text = "برای خاموش شدن، اینجا " + PersianUtils.digits(target) + " بار لمس کن"
+            textSize = 20f
+            gravity = android.view.Gravity.CENTER
+            setTextColor(getColor(R.color.text_primary))
+            setPadding(24, 48, 24, 48)
+            background = androidx.core.content.ContextCompat.getDrawable(this@AlarmRingActivity, R.drawable.bg_surface_card)
+        }
+        val dialog = AlertDialog.Builder(this).setTitle("چالش لمس").setView(text).setCancelable(false).create()
+        text.setOnClickListener {
+            count++
+            text.text = PersianUtils.digits(count) + " از " + PersianUtils.digits(target)
+            if (count >= target) { dialog.dismiss(); stopAndFinish() }
+        }
+        dialog.show()
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
+    }
+
+    private fun startPatternChallenge() {
+        val patternView = PatternChallengeView(this, patternSize)
+        val dialog = AlertDialog.Builder(this).setTitle("الگو را بکش")
+            .setMessage("یک الگوی پیوسته با حداقل ۳ نقطه رسم کن.")
+            .setView(patternView).setCancelable(false)
+            .setPositiveButton("بررسی الگو", null).setNegativeButton("پاک کردن", null).create()
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
+                if (patternView.selectedCount >= 3) { dialog.dismiss(); stopAndFinish() }
+                else android.widget.Toast.makeText(this, "الگو باید حداقل ۳ نقطه داشته باشد.", android.widget.Toast.LENGTH_SHORT).show()
+            }
+            dialog.getButton(AlertDialog.BUTTON_NEGATIVE)?.setOnClickListener { patternView.clearPattern() }
+        }
+        dialog.show()
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
+    }
+
+    private class PatternChallengeView(context: android.content.Context, private val grid: Int) : View(context) {
+        private val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+        private val path = Path()
+        private val points = mutableListOf<Pair<Float, Float>>()
+        private val selected = linkedSetOf<Int>()
+        val selectedCount: Int get() = selected.size
+        override fun onDraw(canvas: Canvas) {
+            super.onDraw(canvas)
+            val side = minOf(width, height).toFloat() - 48f
+            val left = (width - side) / 2f
+            val top = (height - side) / 2f
+            points.clear()
+            for (r in 0 until grid) for (col in 0 until grid) {
+                points.add(left + side * col / (grid - 1) to top + side * r / (grid - 1))
+            }
+            paint.style = Paint.Style.STROKE; paint.strokeWidth = 8f; paint.color = context.getColor(R.color.accent_cyan)
+            canvas.drawPath(path, paint)
+            paint.style = Paint.Style.FILL
+            points.forEachIndexed { index, point ->
+                paint.color = if (index in selected) context.getColor(R.color.accent_violet) else context.getColor(R.color.text_secondary)
+                canvas.drawCircle(point.first, point.second, 12f, paint)
+            }
+        }
+        override fun onTouchEvent(event: android.view.MotionEvent): Boolean {
+            if (event.action == android.view.MotionEvent.ACTION_DOWN || event.action == android.view.MotionEvent.ACTION_MOVE) {
+                val side = minOf(width, height).toFloat() - 48f
+                val left = (width - side) / 2f; val top = (height - side) / 2f
+                var index = 0
+                var best = Float.MAX_VALUE
+                for (r in 0 until grid) for (col in 0 until grid) {
+                    val x = left + side * col / (grid - 1); val y = top + side * r / (grid - 1)
+                    val distance = kotlin.math.hypot(event.x - x, event.y - y)
+                    if (distance < best) { best = distance; index = r * grid + col }
+                }
+                if (best < side / (grid - 1) * 0.45f && selected.add(index)) {
+                    val pointX = left + side * (index % grid) / (grid - 1)
+                    val pointY = top + side * (index / grid) / (grid - 1)
+                    if (selected.size == 1) path.moveTo(pointX, pointY) else path.lineTo(pointX, pointY)
+                    invalidate()
+                }
+                return true
+            }
+            return event.action == android.view.MotionEvent.ACTION_UP
+        }
+        fun clearPattern() { selected.clear(); path.reset(); invalidate() }
+    }
+
+    private fun startMemoryChallenge() {
+        val answer = (1000..9999).random().toString()
+        val dialog = AlertDialog.Builder(this).setTitle("عدد را به خاطر بسپار")
+            .setMessage(answer).setCancelable(false).setPositiveButton("آماده‌ام", null).create()
+        dialog.setOnShowListener {
+            dialog.getButton(AlertDialog.BUTTON_POSITIVE)?.setOnClickListener {
+                dialog.dismiss()
+                val input = EditText(this).apply { hint = "عدد را وارد کن"; inputType = InputType.TYPE_CLASS_NUMBER; setSingleLine(true) }
+                AlertDialog.Builder(this).setTitle("عدد را وارد کن").setView(input).setCancelable(false)
+                    .setPositiveButton("بررسی") { _, _ ->
+                        if (input.text.toString() == answer) stopAndFinish()
+                        else android.widget.Toast.makeText(this, "عدد درست نیست؛ دوباره تلاش کن.", android.widget.Toast.LENGTH_SHORT).show()
+                    }.show()
+            }
+        }
+        dialog.show()
+        dialog.window?.setBackgroundDrawableResource(R.drawable.bg_dialog_surface)
+        challengeHandler.postDelayed({ if (dialog.isShowing) dialog.setMessage("عدد پنهان شد؛ آماده‌ای؟") }, 2500L)
+    }
+
+    private fun startHoldChallenge() {
+        binding.buttonDismiss.text = "برای ۸ ثانیه نگه دار"
+        binding.buttonDismiss.setOnTouchListener { _, event ->
+            when (event.action) {
+                android.view.MotionEvent.ACTION_DOWN -> {
+                    holdStartedAt = System.currentTimeMillis()
+                    holdRunnable = object : Runnable {
+                        override fun run() {
+                            val elapsed = System.currentTimeMillis() - holdStartedAt
+                            binding.buttonDismiss.text = "نگه دار: " + PersianUtils.digits(((8000L - elapsed).coerceAtLeast(0L) / 1000L).toInt()) + " ثانیه"
+                            if (elapsed >= 8000L) {
+                                binding.buttonDismiss.setOnTouchListener(null)
+                                stopAndFinish()
+                            } else challengeHandler.postDelayed(this, 100L)
+                        }
+                    }
+                    challengeHandler.post(holdRunnable!!)
+                    true
+                }
+                android.view.MotionEvent.ACTION_UP, android.view.MotionEvent.ACTION_CANCEL -> {
+                    challengeHandler.removeCallbacks(holdRunnable ?: return@setOnTouchListener true)
+                    binding.buttonDismiss.text = "دوباره نگه دار"
+                    true
+                }
+                else -> true
+            }
+        }
+    }
+
     private fun stopAndFinish() {
         stopAlarmService()
         ringtone?.stop()
@@ -425,6 +744,8 @@ class AlarmRingActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
+        stopChallengeSensor()
+        challengeHandler.removeCallbacksAndMessages(null)
         iconPulse?.cancel()
         pulseAnimators.forEach { it.cancel() }
         tickHandler.removeCallbacks(tick)
