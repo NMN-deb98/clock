@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Alarm::class], version = 3, exportSchema = false)
+@Database(entities = [Alarm::class], version = 4, exportSchema = false)
 abstract class AlarmDatabase : RoomDatabase() {
     abstract fun alarmDao(): AlarmDao
 
@@ -25,6 +25,20 @@ abstract class AlarmDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+                database.execSQL("ALTER TABLE alarms ADD COLUMN walkTarget INTEGER NOT NULL DEFAULT 40")
+                database.execSQL("ALTER TABLE alarms ADD COLUMN shakeDifficulty TEXT NOT NULL DEFAULT 'MEDIUM'")
+                database.execSQL("ALTER TABLE alarms ADD COLUMN typeMode TEXT NOT NULL DEFAULT 'RANDOM'")
+                database.execSQL("ALTER TABLE alarms ADD COLUMN customPhrase TEXT NOT NULL DEFAULT ''")
+                database.execSQL("ALTER TABLE alarms ADD COLUMN touchTarget INTEGER NOT NULL DEFAULT 30")
+                database.execSQL("ALTER TABLE alarms ADD COLUMN patternSize INTEGER NOT NULL DEFAULT 3")
+                database.execSQL("ALTER TABLE alarms ADD COLUMN memoryDifficulty TEXT NOT NULL DEFAULT 'MEDIUM'")
+                database.execSQL("ALTER TABLE alarms ADD COLUMN snoozeCount INTEGER NOT NULL DEFAULT 3")
+                database.execSQL("ALTER TABLE alarms ADD COLUMN snoozeMinutes INTEGER NOT NULL DEFAULT 10")
+            }
+        }
+
         @Volatile private var INSTANCE: AlarmDatabase? = null
 
         fun getInstance(context: Context): AlarmDatabase {
@@ -33,7 +47,7 @@ abstract class AlarmDatabase : RoomDatabase() {
                     context.applicationContext,
                     AlarmDatabase::class.java,
                     "alarm_database"
-                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
+                ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4).build()
                 INSTANCE = instance
                 instance
             }
