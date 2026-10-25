@@ -77,6 +77,12 @@ class AlarmRingingService : Service() {
                 putExtra("wake_mode", intent.getStringExtra("wake_mode") ?: "NONE")
                 putExtra("math_difficulty", intent.getStringExtra("math_difficulty") ?: "MEDIUM")
                 putExtra("delete_after_ringing", intent.getBooleanExtra("delete_after_ringing", false))
+                putExtra("walk_target", intent.getIntExtra("walk_target", 40))
+                putExtra("shake_difficulty", intent.getStringExtra("shake_difficulty") ?: "MEDIUM")
+                putExtra("type_mode", intent.getStringExtra("type_mode") ?: "RANDOM")
+                putExtra("custom_phrase", intent.getStringExtra("custom_phrase").orEmpty())
+                putExtra("touch_target", intent.getIntExtra("touch_target", 30))
+                putExtra("pattern_size", intent.getIntExtra("pattern_size", 3))
             })
         }
         return START_NOT_STICKY
