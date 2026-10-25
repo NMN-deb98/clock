@@ -131,6 +131,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun updateNextAlarm() {
+        val current = Calendar.getInstance()
+        val currentHour = current.get(Calendar.HOUR_OF_DAY)
+        binding.heroIcon.setImageResource(if (currentHour in 6..17) R.drawable.ic_sun else R.drawable.ic_moon)
+        binding.heroIcon.rotation = current.get(Calendar.MINUTE) * 6f + current.get(Calendar.SECOND) * 0.1f
         val next = latestAlarms.filter { it.enabled }
             .map { it to AlarmScheduler.nextTriggerTimeMillis(it) }
             .minByOrNull { it.second }
