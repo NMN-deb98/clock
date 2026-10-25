@@ -44,6 +44,12 @@ object NotificationHelper {
             putExtra("wake_mode", wakeMode)
             putExtra("math_difficulty", mathDifficulty)
             putExtra("delete_after_ringing", deleteAfterRinging)
+            putExtra("walk_target", walkTarget)
+            putExtra("shake_difficulty", shakeDifficulty)
+            putExtra("type_mode", typeMode)
+            putExtra("custom_phrase", customPhrase)
+            putExtra("touch_target", touchTarget)
+            putExtra("pattern_size", patternSize)
         }
         val pending = PendingIntent.getActivity(context, alarmId, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val body = label.ifBlank { context.getString(R.string.no_note) }
