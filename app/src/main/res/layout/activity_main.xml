@@ -58,6 +58,19 @@
                         android:layout_marginTop="2dp"
                         android:textColor="@color/text_secondary"
                         android:textSize="14sp" />
+                    <TextView
+                        android:id="@+id/buttonAlarmSettings"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:background="@drawable/bg_accent_pill"
+                        android:clickable="true"
+                        android:focusable="true"
+                        android:paddingHorizontal="14dp"
+                        android:paddingVertical="8dp"
+                        android:text="تنظیمات صدا و چرت زدن  ⚙"
+                        android:textColor="@color/accent_cyan"
+                        android:textSize="13sp" />
                 </LinearLayout>
 
                 <LinearLayout
