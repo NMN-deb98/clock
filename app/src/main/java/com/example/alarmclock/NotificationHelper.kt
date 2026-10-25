@@ -63,6 +63,12 @@ object NotificationHelper {
             putExtra("wake_mode", wakeMode)
             putExtra("math_difficulty", mathDifficulty)
             putExtra("delete_after_ringing", deleteAfterRinging)
+            putExtra("walk_target", walkTarget)
+            putExtra("shake_difficulty", shakeDifficulty)
+            putExtra("type_mode", typeMode)
+            putExtra("custom_phrase", customPhrase)
+            putExtra("touch_target", touchTarget)
+            putExtra("pattern_size", patternSize)
         }
         val snoozePending = PendingIntent.getBroadcast(
             context, 20000 + alarmId, actionIntent(AlarmActionReceiver.ACTION_SNOOZE),
@@ -94,7 +100,8 @@ object NotificationHelper {
     }
 
     fun showAlarmNotification(context: Context, alarm: Alarm) {
-        val notification = buildAlarmNotification(context, alarm.id, alarm.label, alarm.ringtoneUri, alarm.vibrate, alarm.wakeMode, alarm.mathDifficulty, alarm.deleteAfterRinging)
+        val notification = buildAlarmNotification(context, alarm.id, alarm.label, alarm.ringtoneUri, alarm.vibrate, alarm.wakeMode, alarm.mathDifficulty, alarm.deleteAfterRinging,
+            alarm.walkTarget, alarm.shakeDifficulty, alarm.typeMode, alarm.customPhrase, alarm.touchTarget, alarm.patternSize)
         (context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).notify(alarm.id, notification)
     }
 
