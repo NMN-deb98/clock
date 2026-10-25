@@ -22,9 +22,17 @@ object SnoozeHelper {
         deleteAfterRinging: Boolean = false
     ) {
         if (alarmId < 0 || minutes <= 0) return
+        val preferences = context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
+        val allowedSnoozes = preferences.getInt("snooze_count", 3).coerceIn(0, 10)
+        val usedSnoozes = preferences.getInt("snooze_used_" + alarmId, 0)
+        if (usedSnoozes >= allowedSnoozes) {
+            android.widget.Toast.makeText(context, "تعداد دفعات چرت زدن تمام شده است.", android.widget.Toast.LENGTH_LONG).show()
+            return
+        }
+        val selectedMinutes = preferences.getInt("snooze_minutes", minutes).coerceIn(1, 30)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerTime = Calendar.getInstance().apply {
-            add(Calendar.MINUTE, minutes)
+            add(Calendar.MINUTE, selectedMinutes)
         }.timeInMillis
 
         val intent = Intent(context, SnoozeReceiver::class.java).apply {
@@ -47,6 +55,7 @@ object SnoozeHelper {
                 AlarmManager.AlarmClockInfo(triggerTime, pendingIntent),
                 pendingIntent
             )
+            preferences.edit().putInt("snooze_used_" + alarmId, usedSnoozes + 1).apply()
         } catch (_: SecurityException) {
             // Exact-alarm access can be revoked while the app is running.
             // Avoid crashing; callers can restore exact-alarm access in Settings.
