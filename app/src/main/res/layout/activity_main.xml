@@ -187,6 +187,58 @@
             android:paddingBottom="8dp">
 
             <LinearLayout
+                android:id="@+id/buttonWorldClock"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="3dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_globe"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="ساعت جهانی"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+            <LinearLayout
+                android:id="@+id/buttonStopwatch"
+                android:layout_width="0dp"
+                android:layout_height="64dp"
+                android:layout_marginHorizontal="3dp"
+                android:layout_weight="1"
+                android:clickable="true"
+                android:focusable="true"
+                android:gravity="center"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:importantForAccessibility="no"
+                    android:src="@drawable/ic_stopwatch"
+                    app:tint="@color/text_secondary" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:text="کرنومتر"
+                    android:textColor="@color/text_secondary"
+                    android:textSize="11sp" />
+            </LinearLayout>
+            <LinearLayout
                 android:id="@+id/buttonHome"
                 android:layout_width="0dp"
                 android:layout_height="64dp"
@@ -214,61 +266,6 @@
                     android:textSize="11sp"
                     android:textStyle="bold" />
             </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/buttonWorldClock"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                android:layout_marginHorizontal="3dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_globe"
-                    app:tint="@color/text_secondary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:text="ساعت جهانی"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11sp" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/buttonStopwatch"
-                android:layout_width="0dp"
-                android:layout_height="64dp"
-                android:layout_marginHorizontal="3dp"
-                android:layout_weight="1"
-                android:clickable="true"
-                android:focusable="true"
-                android:gravity="center"
-                android:orientation="vertical">
-
-                <ImageView
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
-                    android:importantForAccessibility="no"
-                    android:src="@drawable/ic_stopwatch"
-                    app:tint="@color/text_secondary" />
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="3dp"
-                    android:text="کرنومتر"
-                    android:textColor="@color/text_secondary"
-                    android:textSize="11sp" />
-            </LinearLayout>
-
             <LinearLayout
                 android:id="@+id/buttonTimer"
                 android:layout_width="0dp"
@@ -295,7 +292,6 @@
                     android:textColor="@color/text_secondary"
                     android:textSize="11sp" />
             </LinearLayout>
-
             <LinearLayout
                 android:id="@+id/buttonDeskClock"
                 android:layout_width="0dp"
