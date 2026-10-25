@@ -6,6 +6,7 @@ import android.widget.Button
 import android.widget.CheckBox
 import android.widget.LinearLayout
 import android.widget.SeekBar
+import android.widget.ScrollView
 import android.widget.TextView
 
 class AlarmSettingsActivity : BaseActivity() {
@@ -110,6 +111,9 @@ class AlarmSettingsActivity : BaseActivity() {
                 finish()
             }
         }.apply { setPadding(0, dp(8), 0, dp(8)) })
-        setContentView(root)
+        setContentView(ScrollView(this).apply {
+            isFillViewport = true
+            addView(root)
+        })
     }
 }
