@@ -59,11 +59,12 @@ class AlarmSettingsActivity : BaseActivity() {
         }
         root.addView(loud)
         val holidays = CheckBox(this).apply {
-            text = "خاموش شدن هشدار در تعطیلات رسمی"
+            text = "خاموش شدن هشدار در تعطیلات رسمی ثابت ایران"
             setTextColor(getColor(R.color.text_primary))
             isChecked = prefs.getBoolean("disable_holidays", false)
         }
         root.addView(holidays)
+        root.addView(label("این گزینه تعطیلات ثابت شمسی را پوشش می‌دهد؛ تعطیلات قمریِ متغیر در این نسخه لحاظ نشده‌اند."))
         root.addView(title("تنظیمات چرت زدن"))
         snoozeCountLabel = title("تعداد دفعات مجاز: " + prefs.getInt("snooze_count", 3), 15f)
         root.addView(snoozeCountLabel)
