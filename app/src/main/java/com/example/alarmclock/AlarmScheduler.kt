@@ -24,6 +24,12 @@ object AlarmScheduler {
             putExtra("wake_mode", alarm.wakeMode)
             putExtra("math_difficulty", alarm.mathDifficulty)
             putExtra("delete_after_ringing", alarm.deleteAfterRinging)
+            putExtra("walk_target", alarm.walkTarget)
+            putExtra("shake_difficulty", alarm.shakeDifficulty)
+            putExtra("type_mode", alarm.typeMode)
+            putExtra("custom_phrase", alarm.customPhrase)
+            putExtra("touch_target", alarm.touchTarget)
+            putExtra("pattern_size", alarm.patternSize)
         }
         val pendingIntent = PendingIntent.getBroadcast(
             context,
