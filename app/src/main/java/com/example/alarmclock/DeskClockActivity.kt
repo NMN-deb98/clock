@@ -78,7 +78,10 @@ class DeskClockActivity : BaseActivity() {
     private val softWhite = Color.argb(150, 255, 255, 255)
 
     private val hideFlash = Runnable { flashView.animate().alpha(0f).setDuration(350L).start() }
-    private val hideChrome = Runnable { closeButton.animate().alpha(0f).setDuration(500L).start() }
+    private val hideChrome = Runnable {
+        closeButton.animate().alpha(0f).setDuration(500L).start()
+        widgetButton.animate().alpha(0f).setDuration(500L).start()
+    }
 
     private val detector by lazy {
         GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
@@ -139,6 +142,15 @@ class DeskClockActivity : BaseActivity() {
                 if (right - left != oldRight - oldLeft || bottom - top != oldBottom - oldTop) fitClock()
             }
         }
+
+        scene = NatureSceneView(this)
+        root.addView(scene, FrameLayout.LayoutParams(-1, -1))
+        root.addView(View(this).apply {
+            background = GradientDrawable(
+                GradientDrawable.Orientation.TOP_BOTTOM,
+                intArrayOf(Color.argb(40, 0, 0, 0), Color.argb(90, 0, 0, 0), Color.argb(40, 0, 0, 0))
+            )
+        }, FrameLayout.LayoutParams(-1, -1))
 
         content = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
@@ -209,6 +221,29 @@ class DeskClockActivity : BaseActivity() {
             }
         )
 
+        listOf(greetingView, timeView, dateView, alarmView).forEach {
+            it.setShadowLayer(dp(8).toFloat(), 0f, dp(2).toFloat(), Color.argb(190, 0, 0, 0))
+        }
+
+        widgetButton = TextView(this).apply {
+            text = "＋ ویجت"
+            textSize = 13f
+            setTextColor(Color.WHITE)
+            gravity = Gravity.CENTER
+            setPadding(dp(14), dp(8), dp(14), dp(8))
+            background = UiFx.rounded(this@DeskClockActivity, Color.argb(60, 255, 255, 255), 22)
+            contentDescription = "افزودن ویجت ساعت به صفحه اصلی"
+            setOnClickListener { WidgetPinner.request(this@DeskClockActivity) }
+            UiFx.pressable(this)
+        }
+        root.addView(
+            widgetButton,
+            FrameLayout.LayoutParams(-2, dp(44), Gravity.TOP or Gravity.END).apply {
+                topMargin = dp(28)
+                marginEnd = dp(20)
+            }
+        )
+
         setAccent(theme.accent)
     }
 
@@ -266,6 +301,8 @@ class DeskClockActivity : BaseActivity() {
     private fun showChrome() {
         closeButton.animate().cancel()
         closeButton.alpha = 0.85f
+        widgetButton.animate().cancel()
+        widgetButton.alpha = 0.9f
         handler.removeCallbacks(hideChrome)
         handler.postDelayed(hideChrome, 3500L)
     }
@@ -310,6 +347,7 @@ class DeskClockActivity : BaseActivity() {
             spannable.setSpan(ForegroundColorSpan(Color.TRANSPARENT), 2, 3, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
         timeView.text = spannable
+        scene.setTime(hour + minute / 60f + second / 3600f)
         dots.setSecond(second)
 
         val minuteKey = hour * 60 + minute
@@ -361,6 +399,9 @@ class DeskClockActivity : BaseActivity() {
         handler.removeCallbacksAndMessages(null)
         super.onDestroy()
     }
+
+    private lateinit var scene: NatureSceneView
+    private lateinit var widgetButton: TextView
 
     private fun dp(value: Int): Int = UiFx.dp(this, value)
 

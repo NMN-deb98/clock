@@ -20,7 +20,7 @@ class AlarmReceiver : BroadcastReceiver() {
         // Do not make the alarm's audible start wait for a Room database read.
         val hasSnapshot = intent.hasExtra("alarm_enabled_snapshot")
         val preferences = context.getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
-        val skipForHoliday = preferences.getBoolean("disable_holidays", false) &&
+        val skipForHoliday = SoundPrefs.skipHolidays(context, alarmId) &&
             PersianUtils.isIranianFixedHoliday()
         if (hasSnapshot && intent.getBooleanExtra("alarm_enabled_snapshot", false) && !skipForHoliday) {
             startRingingService(context, intent, alarmId)

@@ -10,6 +10,9 @@ import kotlinx.coroutines.launch
 class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == Intent.ACTION_BOOT_COMPLETED) {
+            AppIconSwitcher.apply(context)
+            AppIconSwitcher.scheduleNext(context)
+            DeskClockWidgetProvider.refreshAll(context)
             val pendingResult = goAsync()
             CoroutineScope(Dispatchers.IO).launch {
                 try {

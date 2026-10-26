@@ -47,6 +47,11 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         window.decorView.layoutDirection = android.view.View.LAYOUT_DIRECTION_RTL
+        updateLiveIconLabel()
+        binding.buttonLiveIcon.setOnClickListener {
+            AppIconSwitcher.setLive(this, !AppIconSwitcher.isLive(this))
+            updateLiveIconLabel()
+        }
         NotificationHelper.createChannel(this)
         askNotificationPermissionIfNeeded()
         askExactAlarmPermissionIfNeeded()
@@ -88,7 +93,6 @@ class MainActivity : AppCompatActivity() {
         binding.buttonStopwatch.setOnClickListener { open(StopwatchActivity::class.java) }
         binding.buttonTimer.setOnClickListener { open(CountdownTimerActivity::class.java) }
         binding.buttonDeskClock.setOnClickListener { open(DeskClockActivity::class.java) }
-        binding.buttonAlarmSettings.setOnClickListener { open(AlarmSettingsActivity::class.java) }
 
         listOf(
             binding.buttonHome, binding.buttonWorldClock, binding.buttonStopwatch,
@@ -161,8 +165,15 @@ class MainActivity : AppCompatActivity() {
         binding.textNextAlarmTime.text = "${next.first.label.ifBlank { "هشدار بعدی" }} • ساعت $clock"
     }
 
+    private fun updateLiveIconLabel() {
+        binding.buttonLiveIcon.text = if (AppIconSwitcher.isLive(this)) "آیکون برنامه با ساعت عوض می‌شود  ●" else "آیکون برنامه ثابت است  ○"
+    }
+
     override fun onResume() {
         super.onResume()
+        AppIconSwitcher.apply(this)
+        AppIconSwitcher.scheduleNext(this)
+        DeskClockWidgetProvider.refreshAll(this)
         refreshHeader()
         countdownHandler.removeCallbacks(countdownTick)
         countdownHandler.post(countdownTick)

@@ -20,6 +20,7 @@ class AlarmRingingService : Service() {
     private var audioManager: AudioManager? = null
     private var audioFocusRequest: android.media.AudioFocusRequest? = null
     private val volumeHandler = android.os.Handler(android.os.Looper.getMainLooper())
+    private var currentId: Int = -1
     private var originalAlarmVolume: Int? = null
     private var targetAlarmVolume: Int = 0
     private var volumeStartedAt: Long = 0L
@@ -52,6 +53,7 @@ class AlarmRingingService : Service() {
         if (intent == null) { stopSelf(); return START_NOT_STICKY }
         val id = intent.getIntExtra("alarm_id", -1)
         if (id < 0) { stopSelf(); return START_NOT_STICKY }
+        currentId = id
         val label = intent.getStringExtra("label").orEmpty()
         val uri = intent.getStringExtra("ringtone_uri").orEmpty()
         val vibrate = intent.getBooleanExtra("vibrate", true)
@@ -103,9 +105,9 @@ class AlarmRingingService : Service() {
             val preferences = getSharedPreferences("alarm_preferences", Context.MODE_PRIVATE)
             val maxAlarmVolume = audioManager!!.getStreamMaxVolume(AudioManager.STREAM_ALARM).coerceAtLeast(1)
             originalAlarmVolume = audioManager!!.getStreamVolume(AudioManager.STREAM_ALARM)
-            targetAlarmVolume = (maxAlarmVolume * preferences.getInt("volume", 75) / 100f).toInt().coerceIn(0, maxAlarmVolume)
-            gradualVolume = preferences.getBoolean("gradual_volume", true)
-            loudEscalation = preferences.getBoolean("loud_escalation", false)
+            targetAlarmVolume = (maxAlarmVolume * SoundPrefs.volume(this, currentId) / 100f).toInt().coerceIn(0, maxAlarmVolume)
+            gradualVolume = SoundPrefs.gradual(this, currentId)
+            loudEscalation = SoundPrefs.loud(this, currentId)
             volumeStartedAt = System.currentTimeMillis()
             volumeHandler.removeCallbacks(volumeTick)
             if (gradualVolume || loudEscalation) {

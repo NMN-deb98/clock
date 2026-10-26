@@ -27,4 +27,5 @@
     <string name="day_wed">چهارشنبه</string>
     <string name="day_thu">پنجشنبه</string>
     <string name="day_fri">جمعه</string>
+    <string name="widget_description">ساعت، تاریخ شمسی، زنگ بعدی و میان‌بر ساخت هشدار روی صفحهٔ اصلی</string>
 </resources>

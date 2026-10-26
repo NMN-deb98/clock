@@ -81,6 +81,17 @@ class AlarmEditActivity : BaseActivity() {
         binding.seekSnoozeCount.setOnSeekBarChangeListener(snoozeListener)
         binding.seekSnoozeMinutes.setOnSeekBarChangeListener(snoozeListener)
         snoozeLabels()
+        val volumeLabel = {
+            binding.textVolume.text = "بلندی صدا: " + PersianUtils.digits(binding.seekVolume.progress + 10) + "٪"
+        }
+        binding.seekVolume.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) = volumeLabel()
+            override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {}
+            override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {}
+        })
+        binding.seekVolume.progress = SoundPrefs.volume(this, -1) - 10
+        binding.checkGradual.isChecked = SoundPrefs.gradual(this, -1)
+        volumeLabel()
         binding.wakeModeGroup.setOnCheckedChangeListener { _, checkedId ->
             binding.mathDifficultyContainer.visibility =
                 if (checkedId == binding.wakeModeMath.id) View.VISIBLE else View.GONE
@@ -139,6 +150,10 @@ class AlarmEditActivity : BaseActivity() {
     }
 
     private fun fillFields(alarm: Alarm) {
+        binding.seekVolume.progress = SoundPrefs.volume(this, alarm.id) - 10
+        binding.checkGradual.isChecked = SoundPrefs.gradual(this, alarm.id)
+        binding.checkLoud.isChecked = SoundPrefs.loud(this, alarm.id)
+        binding.checkHoliday.isChecked = SoundPrefs.skipHolidays(this, alarm.id)
         binding.seekSnoozeCount.progress = SnoozeHelper.allowed(this, alarm.id)
         binding.seekSnoozeMinutes.progress = SnoozeHelper.minutesFor(this, alarm.id) - 1
         binding.timePicker.hour = alarm.hour
@@ -228,12 +243,13 @@ class AlarmEditActivity : BaseActivity() {
         )
         if (existingAlarm != null) {
             SnoozeHelper.saveConfig(this, alarm.id, alarm.snoozeCount, alarm.snoozeMinutes)
+            SoundPrefs.save(this, alarm.id, binding.seekVolume.progress + 10, binding.checkGradual.isChecked, binding.checkLoud.isChecked, binding.checkHoliday.isChecked); 
             AlarmScheduler.cancel(this, existingAlarm!!)
             viewModel.update(alarm)
             AlarmScheduler.schedule(this, alarm)
             finish()
         } else {
-            viewModel.insert(alarm) { inserted -> SnoozeHelper.saveConfig(this, inserted.id, inserted.snoozeCount, inserted.snoozeMinutes); AlarmScheduler.schedule(this, inserted); finish() }
+            viewModel.insert(alarm) { inserted -> SoundPrefs.save(this, inserted.id, binding.seekVolume.progress + 10, binding.checkGradual.isChecked, binding.checkLoud.isChecked, binding.checkHoliday.isChecked); SnoozeHelper.saveConfig(this, inserted.id, inserted.snoozeCount, inserted.snoozeMinutes); AlarmScheduler.schedule(this, inserted); finish() }
         }
     }
 }

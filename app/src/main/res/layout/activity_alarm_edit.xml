@@ -239,6 +239,63 @@
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:text="تنظیمات صدا"
+                android:textColor="@color/text_primary"
+                android:textSize="17sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:id="@+id/textVolume"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:textColor="@color/text_secondary"
+                android:textSize="14sp" />
+
+            <SeekBar
+                android:id="@+id/seekVolume"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:max="90"
+                android:progress="65" />
+
+            <CheckBox
+                android:id="@+id/checkGradual"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/accent_cyan"
+                android:checked="true"
+                android:text="افزایش تدریجی بلندی صدا"
+                android:textColor="@color/text_primary" />
+
+            <CheckBox
+                android:id="@+id/checkLoud"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/accent_cyan"
+                android:text="صدای خیلی بلند اگر بعد از ۳۰ ثانیه پاسخ ندادم"
+                android:textColor="@color/text_primary" />
+
+            <CheckBox
+                android:id="@+id/checkHoliday"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:buttonTint="@color/accent_cyan"
+                android:text="خاموش بودن در تعطیلات رسمی ثابت ایران"
+                android:textColor="@color/text_primary" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_surface_card"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
                 android:text="تنظیمات چرت زدن"
                 android:textColor="@color/text_primary"
                 android:textSize="17sp"

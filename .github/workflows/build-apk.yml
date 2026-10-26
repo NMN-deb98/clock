@@ -2,7 +2,7 @@ name: Build Hooshyar APK
 
 on:
   push:
-    branches: [main, feature/professional-alarm-clock, redesign/premium-clock-ui, feature/persian-premium-navigation, feature/hooshyar-name-math-rtl, fix/hooshyar-worldclock-timer-rgb-lockscreen, fix/hooshyar-alarm-lockscreen-worldclock-ui, fix/hooshyar-worldclock-crash-lockscreen-alarm, fix/world-clock-reliability-timer-unit-labels, fix/world-clock-snooze-lockscreen-reliability, feature/ui-persian-font-desk-clock, fix/wake-bugs]
+    branches: [main, feature/professional-alarm-clock, redesign/premium-clock-ui, feature/persian-premium-navigation, feature/hooshyar-name-math-rtl, fix/hooshyar-worldclock-timer-rgb-lockscreen, fix/hooshyar-alarm-lockscreen-worldclock-ui, fix/hooshyar-worldclock-crash-lockscreen-alarm, fix/world-clock-reliability-timer-unit-labels, fix/world-clock-snooze-lockscreen-reliability, feature/ui-persian-font-desk-clock, fix/wake-bugs, feat/nature-widget-icon]
   workflow_dispatch:
 
 permissions:
@@ -63,16 +63,20 @@ jobs:
           cat > release-notes.md <<'NOTES'
           ## تغییرات نسخه هوشیار (Hooshyar)
 
-          ### رفع باگ‌ها
-          - **راه رفتن:** شمارش قدم دوباره کار می‌کند؛ اجازهٔ «فعالیت بدنی» درخواست می‌شود و اگر قدم‌شمار نبود از حرکت‌سنج استفاده می‌شود. پیشرفت روی صفحه دیده می‌شود.
-          - **الگو:** صفحهٔ کشیدن الگو از نو ساخته شد؛ با وصل کردن حداقل ۴ نقطه هشدار خاموش می‌شود.
-          - **دکمه‌های نوتیفیکیشن:** «خاموش» و «چرت» حالا درست کار می‌کنند.
-          - **صفحهٔ قفل:** اجازهٔ نمایش روی سایر برنامه‌ها اضافه شد و در صفحهٔ اصلی یک راهنمای تنظیمات (اعلان، نمایش تمام‌صفحه، نمایش روی برنامه‌ها) نشان داده می‌شود.
+          ### تنظیمات هر هشدار
+          - «تنظیمات صدا» (بلندی، افزایش تدریجی، صدای خیلی بلند، تعطیلات رسمی) و «تنظیمات چرت زدن» حالا برای هر هشدار، داخل صفحهٔ ساخت/ویرایش هشدار هستند؛ دکمهٔ جدا از صفحهٔ اصلی حذف شد.
 
-          ### تنظیمات چرت زدن
-          - حالا برای هر هشدار، داخل صفحهٔ ساخت/ویرایش هشدار است (تعداد دفعات و مدت هر چرت)؛ بخش جدا حذف شد.
+          ### ساعت رومیزی
+          - پس‌زمینهٔ متحرک و آرامش‌بخش: کوه‌ها، دریاچهٔ موج‌دار، ابر و مه، پرنده در روز؛ ستاره، ماه، شهاب و کرم شب‌تاب در شب. آسمان با ساعت واقعی گوشی عوض می‌شود.
+          - دکمهٔ «＋ ویجت» برای افزودن ویجت به صفحهٔ اصلی (با پرسش از کاربر).
 
-          > توجه: روی بعضی گوشی‌ها (شیائومی، سامسونگ و...) باید در تنظیمات گوشی اجازهٔ «نمایش روی صفحهٔ قفل» را هم بدهید.
+          ### ویجت صفحهٔ اصلی
+          - ساعت زنده، تاریخ شمسی، زنگ بعدی و میان‌بر «＋ هشدار»، «هشدارها» و «رومیزی»؛ رنگ آن با صبح، روز، غروب و شب عوض می‌شود.
+
+          ### آیکون برنامه
+          - آیکون برنامه با زمان روز (بامداد، روز، غروب، شب) عوض می‌شود. اندروید اجازهٔ انیمیشن واقعی برای آیکون نمی‌دهد. از صفحهٔ اصلی می‌شود این قابلیت را خاموش کرد.
+
+          > توجه: روی بعضی لانچرها با عوض شدن آیکون ممکن است میان‌بر صفحهٔ اصلی ناپدید شود؛ در این صورت قابلیت را خاموش و برنامه را دوباره از منوی برنامه‌ها اضافه کن.
           NOTES
           sed -i 's/^          //' release-notes.md
           TAG="v1.0.${{ github.run_number }}"

@@ -9,6 +9,7 @@ import java.util.Calendar
 object AlarmScheduler {
 
     fun schedule(context: Context, alarm: Alarm) {
+        DeskClockWidgetProvider.refreshAll(context, 1500L)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val triggerTime = nextTriggerTimeMillis(alarm)
 
@@ -57,6 +58,7 @@ object AlarmScheduler {
     }
 
     fun cancel(context: Context, alarm: Alarm) {
+        DeskClockWidgetProvider.refreshAll(context, 1500L)
         val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val intent = Intent(context, AlarmReceiver::class.java)
         val pendingIntent = PendingIntent.getBroadcast(
